@@ -1,10 +1,10 @@
 Redmine::Plugin.register :redmine_chart do
   name 'Redmine Chart plugin'
-  author 'Author name'
+  author 'ryuthky'
   description 'This is a plugin for Redmine'
   version '0.0.1'
-  url 'http://example.com/path/to/plugin'
-  author_url 'http://example.com/about'
+  url 'https://github.com/ryuthky/redmine_burn_charts'
+  author_url 'https://github.com/ryuthky/redmine_burn_charts/wiki'
   
   project_module :redmine_chart do
     permission :view_chart,  :redmine_chart =>[:index, :show]
