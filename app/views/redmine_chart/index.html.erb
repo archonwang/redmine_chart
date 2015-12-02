@@ -1,0 +1,27 @@
+<h2>RedmineChartController#index</h2>
+<div class="contextual">
+  <%= link_to_if_authorized(l(:label_redmine_chart_new), 
+                            {:action => 'new', :project_id => @project}, 
+                            :class => 'icon icon-add') %>
+</div>
+<% if (@redmine_chart.blank?) %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+   データのテーブル
+<table class="list">
+
+<thead><tr>  
+<th>#</th> <th><%=h l(:field_subject) %></th>
+</tr></thead>
+
+<tbody>
+<% @foos.each do |foo| %>
+  <tr class="<%= cycle('odd', 'even') %>">
+  <td><%= redmine_chart.id %></td>
+  <td><%= link_to redmine_chart.subject, project_redmine_chart_path(@project, redmine_chart.id) %></td>
+</tr>
+<% end %>
+</tbody>
+
+</table>
+<% end %>
