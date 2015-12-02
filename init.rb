@@ -11,6 +11,7 @@ Redmine::Plugin.register :redmine_chart do
     permission :manage_chart, :redmine_chart =>[:new, :edit, :create, :update, :destroy, :preview], :require => :member
   end
   
-  menu :project_menu, :redmine_chart, {:controller =>'redmine_chart', :action =>`index`}, :param => :project_id, :caption => "chart"
+  permission :redmine_chart,{:redmine_chart => [:index]}, public =>true
+  menu :project_menu, :redmine_chart, {:controller =>'redmine_chart', :action =>'index'}, :param => :project_id, :caption => 'charts', :first =>true,
 
 end

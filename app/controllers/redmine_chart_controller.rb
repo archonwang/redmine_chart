@@ -5,7 +5,8 @@ class RedmineChartController < ApplicationController
   before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview]
   # :
   def index
-    @redmin_chart =Redmine_chart.find(:all, :conditions => ["project_id = #{@project.id} "])
+    #@redmin_chart =Redmine_chart.find(:all, :conditions => ["project_id = #{@project.id} "])
+	@name ='name get!!'
   end
 
   def new
