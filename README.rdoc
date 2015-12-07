@@ -1,3 +1,5 @@
 = redmine_chart
 
-Description goes here
+redmine3.X系でburnup/burndown chartを表示するプラグインを作ってるところです
+ruby on rails初心者のためチュートリアルを参考に試行錯誤しているリポジトリです
+まったく使い物になりません
