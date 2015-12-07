@@ -7,4 +7,5 @@ Rails.application.routes.draw do
       put  'preview', :on => :member
   end
  end
+ get 'redmine_chart', :to => 'redmine_chart#index'
 end

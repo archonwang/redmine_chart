@@ -12,8 +12,8 @@ Redmine::Plugin.register :redmine_chart do
   end
  
   permission :redmine_chart, { :redmine_chart => [:index] }, :public => true
-  menu :project_menu, :test , {:controller =>'redmine_chart', :action =>'index'}, :param => :project_id, :caption => 'charts', :after => 'gantt'
+  menu :project_menu, :redmine_chart , {:controller =>'redmine_chart', :action =>'index'}, :param => :project_id, :caption => 'charts', :after => 'gantt'
   
-  menu :account_menu, :test , {:controller =>'redmine_chart', :action =>'index'}, :caption => 'charts', :last =>true
+  menu :account_menu, :redmine_chart , {:controller =>'redmine_chart', :action =>'index'}, :caption => 'charts', :last =>true
 
 end
