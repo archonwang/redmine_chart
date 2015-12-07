@@ -1,4 +1,5 @@
 <h2>RedmineChartController#index</h2>
+<%= @name %>
 <div class="contextual">
   <%= link_to_if_authorized(l(:label_redmine_chart_new), 
                             {:action => 'new', :project_id => @project}, 

@@ -13,9 +13,7 @@ Redmine::Plugin.register :redmine_chart do
  
   permission :redmine_chart, { :redmine_chart => [:index] }, :public => true
   menu :project_menu, :test , {:controller =>'redmine_chart', :action =>'index'}, :param => :project_id, :caption => 'charts', :after => 'gantt'
+  
+  menu :account_menu, :test , {:controller =>'redmine_chart', :action =>'index'}, :caption => 'charts', :last =>true
 
-# プロジェクトごとの権限を追加
- project_module :test do
-    permission :view_sample, :sample => :index
- end
 end
