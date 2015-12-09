@@ -31,7 +31,7 @@ class RedmineChartController < ApplicationController
 	@multiple = LazyHighCharts::HighChart.new('graph') do |f|
         f.title(:text => "Population vs GDP For 5 Big Countries [2009]")
         f.xAxis(:categories => ["United States", "Japan", "China", "Germany", "France"])
-        f.series(:name => "GDP in Billions", :yAxis => 0, :data => [14119, 5068, 4985, 3339, 2656], type: 'colum')
+        f.series(:name => "GDP in Billions", :yAxis => 0, :data => [14119, 5068, 4985, 3339, 2656], type: 'column')
         f.series(:name => "Population in Millions", :yAxis => 1, :data => [310, 127, 1340, 81, 65])
         f.yAxis [
           {:title => {:text => "GDP in Billions", :margin => 70} },
@@ -39,7 +39,7 @@ class RedmineChartController < ApplicationController
         ]
         f.legend(:align => 'right', :verticalAlign => 'top', :y => 75, :x => -50, :layout => 'vertical',)
         #f.chart({:defaultSeriesType=>"column"})
-		f.option[:chart][:defaultSeriesType]= 'spline'
+		f.option[:chart][:defaultSeriesType]= 'line'
     end
   end
 
