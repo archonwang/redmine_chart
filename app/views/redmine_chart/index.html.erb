@@ -4,6 +4,11 @@
 <div id=“container” style=“width: 100%; height: 400px”>
 <%= high_chart("hoge", @chart) %>
 </div>
+<div id=“container” style=“width: 100%; height: 600px”>
+<%= high_chart("sample", @graph) %>
+</div>
+
+
 <div class="contextual">
   <%= link_to_if_authorized(l(:label_redmine_chart_new), 
                             {:action => 'new', :project_id => @project}, 
