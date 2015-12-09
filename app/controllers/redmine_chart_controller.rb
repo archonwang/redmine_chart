@@ -5,7 +5,20 @@ class RedmineChartController < ApplicationController
   before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview]
   # :
   def index
-	@name ='name get!!'
+    @name ='name get!!'
+    @chart = LazyHighCharts::HighChart.new('pie') do |f|
+    f.chart({defaultSeriesType: 'pie', margin: [50, 200, 60, 170]})
+    f.series({
+      type: 'pie',
+      name: 'hoge',
+      data: [
+        ['hoge', 50.0],
+        ['huga', 25.0],
+        ['piyo', 25.0],
+        ['hage', 0]
+      ]
+    })
+   end
   end
 
   def new
