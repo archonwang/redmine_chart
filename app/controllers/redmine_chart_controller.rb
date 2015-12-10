@@ -38,8 +38,8 @@ class RedmineChartController < ApplicationController
           {:title => {:text => "Population in Millions"}, :opposite => true},
         ]
         f.legend(:align => 'right', :verticalAlign => 'top', :y => 75, :x => -50, :layout => 'vertical',)
-        #f.chart({:defaultSeriesType=>"column"})
-		f.option[:chart][:defaultSeriesType]= 'line'
+	f.chart({:defaultSeriesType=> 'line'})
+        # いずれイメージ出力するf.exporting(:enabled=>true,:filename=>"multi.png")
     end
   end
 
