@@ -1,7 +1,7 @@
 <%= javascript_include_tag 'highcharts.js', :plugin => 'redmine_chart' %>
 <h2>RedmineChartController#index</h2>
-<%= @name %>
-<%= @crnt_uid %>
+<%= @name %><p>
+<%= @crnt_uid %><%= @crnt_uname %>
 <div id=“container” style=“width: 100%; height: 400px”>
 <%= high_chart("hoge", @chart) %>
 </div>

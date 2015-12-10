@@ -6,6 +6,7 @@ class RedmineChartController < ApplicationController
   # :
   def index
     @name ='name get!!'
+	@crnt_uname = User.current.login
 	@crnt_uid = User.current.id
     @chart = LazyHighCharts::HighChart.new('pie') do |f|
     f.chart({defaultSeriesType: 'pie', margin: [50, 200, 60, 170]})
