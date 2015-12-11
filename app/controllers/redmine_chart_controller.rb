@@ -6,8 +6,13 @@ class RedmineChartController < ApplicationController
   # :
   def index
     @name ='name get!!'
-	@crnt_uname = User.current.login
-	@crnt_uid = User.current.id
+    @crnt_uname = User.current.login
+    @crnt_uid = User.current.id
+    @assigned_list = Issue.where(["project_id = ? AND assigned_to_id = ?", @project, @crnt_uid])
+                  
+    @assigned = @assigned_list.count
+    @open = @assigned_list.open.count
+
     @chart = LazyHighCharts::HighChart.new('pie') do |f|
     f.chart({defaultSeriesType: 'pie', margin: [50, 200, 60, 170]})
     f.series({
