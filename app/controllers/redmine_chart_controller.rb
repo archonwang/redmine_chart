@@ -4,8 +4,14 @@ class RedmineChartController < ApplicationController
   before_filter :find_project, :authorize
   before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview]
   # :
+  @days = Setting.activity_days_default.to_i
+  @date_to ||= Date.today + 1
+  @date_from = @date_to - @days
+
   def index
     @name ='name get!!'
+  @days = Setting.activity_days_default.to_i
+  @date_to ||= Date.today + 1
     @crnt_uname = User.current.login
     @crnt_uid = User.current.id
     @assigned_list = Issue.where(["project_id = ? AND assigned_to_id = ?", @project, @crnt_uid])

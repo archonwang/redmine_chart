@@ -1,5 +1,8 @@
 <%= javascript_include_tag 'highcharts.js', :plugin => 'redmine_chart' %>
 <h2>RedmineChartController#index</h2>
+<%= @days%>　あれから<br>
+<%= format_date(@date_to -@days)%> 始めた日<br>
+<%= @date_to%> 今日<br>
 <%= @name %>
 <br>
 <h3><%= @crnt_uname %>さんのチケット</h3
