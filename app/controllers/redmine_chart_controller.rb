@@ -12,6 +12,12 @@ class RedmineChartController < ApplicationController
                   
     @assigned = @assigned_list.count
     @open = @assigned_list.open.count
+    @status_list_cnt =  [ "id" ]
+    last = IssueStatus.last.id
+    (1..last).each{ | stslist |
+    #@status_list_cnt[stslist]= @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").count{|sts| sts == stslist }
+     @status_list_cnt[stslist]= @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist ).count
+   }
 
     @chart = LazyHighCharts::HighChart.new('pie') do |f|
     f.chart({defaultSeriesType: 'pie', margin: [50, 200, 60, 170]})
