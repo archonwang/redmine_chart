@@ -12,26 +12,30 @@ class RedmineChartController < ApplicationController
                   
     @assigned = @assigned_list.count
     @open = @assigned_list.open.count
-    @status_list_cnt =  [ "id" ]
+    @status_list_cnt = [[ "id","count" ]]
     last = IssueStatus.last.id
     (1..last).each{ | stslist |
-    #@status_list_cnt[stslist]= @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").count{|sts| sts == stslist }
-     @status_list_cnt[stslist]= @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist ).count
+     @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist )
+     @status_list_cnt[stslist]= [IssueStatus.find(stslist).name , @assigned_stats.where(status_id: stslist ).count]
    }
+     @status_list_cnt.shift
+     
 
     @chart = LazyHighCharts::HighChart.new('pie') do |f|
     f.chart({defaultSeriesType: 'pie', margin: [50, 200, 60, 170]})
     f.series({
       type: 'pie',
-      name: 'hoge',
-      data: [
-        ['hoge', 50.0],
-        ['huga', 25.0],
-        ['piyo', 25.0],
-        ['hage', 0]
-      ]
+      name: 'Issues',
+      data:   @status_list_cnt
+      #data: [
+      #  ['hoge', 50.0],
+      #  ['huga', 25.0],
+      #  ['piyo', 25.0],
+      #  ['hage', 0]
+      #]
     })
     end
+
     category = [1,3,5,7]
     current_quantity = [1000,5000,3000,8000]
 
