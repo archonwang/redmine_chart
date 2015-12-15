@@ -6,7 +6,9 @@
 <br>
 <h3><%= @crnt_uname%><%= l(:label_redmine_chart_index_tickets_for) %></h3>
 <p>
-<%= render :partial => 'pie_chart', object:  @status_list_cnt ,  :locals => { :total => @assigned , :chart =>@chart } %>
+<%= render :partial => 'pie_chart', object:  @status_list_cnt ,  :locals => { :total => @assigned , :chart =>@chart , :name => "sts"} %>
+
+<%= render :partial => 'pie_chart', object:  @prj_list_cnt ,  :locals => { :total => @all_assigned , :chart =>@chart2 , :name => "prj" } %>
 
 <div id=“container” style=“width: 70%; height: 600px”>
 <%= high_chart("sample", @graph) %>
