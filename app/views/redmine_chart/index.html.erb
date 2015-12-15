@@ -23,6 +23,7 @@
 <%= high_chart("mix", @multiple) %>
 </div>
 
+<%= render :partial => 'pie_chart', :locals => {:query => @status_list_cnt, :total => @assigned :chart =>@chart } %>
 
 <div class="contextual">
   <%= link_to_if_authorized(l(:label_redmine_chart_new), 
