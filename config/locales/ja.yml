@@ -1,0 +1,10 @@
+# Japanese strings go here for Rails i18n
+ja:
+  # my_label: "My label"
+label_redmine_chart_index_prj_menu    : "プロジェクトメニュー"
+label_redmine_chart_index_start_day   : "プロジェクト開始日"
+label_redmine_chart_index_past_days   : "プロジェクト経過日数"
+label_redmine_chart_index_tickets_for : "さんの担当チケット" 
+label_redmine_chart_index_total       : "チケット合計"
+label_redmine_chart_new               : "新規作成"
+
