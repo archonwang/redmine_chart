@@ -1,9 +1,10 @@
 # English strings go here for Rails i18n
 en:
   # my_label: "My label"
-label_redmine_chart_index_prj_menu    : "Project Chart Menu"
-label_redmine_chart_index_start_day   : "Project Start Day"
-label_redmine_chart_index_past_days   : "Project Spent Day"
-label_redmine_chart_index_tickets_for : "Assigend Ticket"
-label_redmine_chart_index_total       : "total"
-label_redmine_chart_new               : "New"
+  label_redmine_chart: "Charts"
+  label_redmine_chart_index_prj_menu: "Project Chart Menu"
+  label_redmine_chart_index_start_day: "Project Start Day"
+  label_redmine_chart_index_past_days: "Project Spent Day"
+  label_redmine_chart_index_tickets_for: "Assigend Ticket"
+  label_redmine_chart_index_total: "total"
+  label_redmine_chart_new: "New"

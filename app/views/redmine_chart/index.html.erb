@@ -4,7 +4,7 @@
 <%= format_date(@date_to)%> <%= l(:label_redmine_chart_index_past_days) %><br>
 <%= @name %>
 <br>
-<h3><%= @crnt_uname  l(:label_redmine_chart_index_tickets_for) %></h3>
+<h3><%= @crnt_uname%><%= l(:label_redmine_chart_index_tickets_for) %></h3>
 <p>
 <table border=1 align="center">
 <% @status_list_cnt.each do |id,cnt| -%>
