@@ -1,7 +1,8 @@
 class RedmineChartController < ApplicationController
   unloadable
   menu_item :redmine_chart
-  before_filter :find_project, :authorize
+  #before_filter :find_project, :authorize
+  before_filter :find_project, :require_login
   before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview]
   # :
 
@@ -73,12 +74,11 @@ class RedmineChartController < ApplicationController
 private
   def find_project
       @project = Project.find(params[:project_id])
-      #@redmine_chart =redmine_chart.find(:all)
   rescue ActiveRecord::RecordNotFound
       render_404
   end
   def find_redmine_chart
-     @redmine_chart = Redmine_chart.find_by_id(params[:id]);
+     @redmine_chart = RedmineChart.find_by_id(params[:id]);
      render_404 unless @redmine_chart
   end
 end
