@@ -7,7 +7,8 @@ Redmine::Plugin.register :redmine_chart do
   url 'https://github.com/ryuthky/redmine_burn_charts'
   author_url 'https://github.com/ryuthky/redmine_burn_charts/wiki'
   # プラグイン設定表示
-  settings :default =>{ 'show_account_menu' => 'true'}, :partial =>'settings/burn_charts_settings'
+  settings :default =>{ 'show_account_menu' => 'true'}, 
+  :partial =>'settings/redmine_chart_settings'
   
   # プラグインモジュール権限設定
   project_module :redmine_chart do
@@ -24,7 +25,7 @@ Redmine::Plugin.register :redmine_chart do
   {:controller =>'redmine_chart', :action =>'index'},
    :param => :project_id, 
    :caption => :label_redmine_chart, 
-   :after => :gantt
+   :after => :gantt,
    :if => Proc.new{User.current.logged? && Setting.plugin_redmine_chart['show_account_menu']}
   
   # プロジェクトメニュー追加  

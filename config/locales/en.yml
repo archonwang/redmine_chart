@@ -4,6 +4,7 @@ en:
   label_redmine_chart: "Charts"
   permission_view_charts: "view charts"
   permission_manage_charts: "manage charts"
+  settings_show_account_menu: "Show Account Menu Enable ?"
   label_redmine_chart_index_prj_menu: "Project Chart Menu"
   label_redmine_chart_index_start_day: "Project Start Day"
   label_redmine_chart_index_past_days: "Project Spent Day"
