@@ -2,6 +2,8 @@
 en:
   # my_label: "My label"
   label_redmine_chart: "Charts"
+  permission_view_charts: "view charts"
+  permission_manage_charts: "manage charts"
   label_redmine_chart_index_prj_menu: "Project Chart Menu"
   label_redmine_chart_index_start_day: "Project Start Day"
   label_redmine_chart_index_past_days: "Project Spent Day"
