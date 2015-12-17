@@ -6,9 +6,6 @@ Redmine::Plugin.register :redmine_chart do
   version '0.0.1'
   url 'https://github.com/ryuthky/redmine_burn_charts'
   author_url 'https://github.com/ryuthky/redmine_burn_charts/wiki'
-  # プラグイン設定表示
-  settings :default =>{ 'show_account_menu' => 'true'}, 
-  :partial =>'settings/redmine_chart_settings'
   
   # プラグインモジュール権限設定
   project_module :redmine_chart do
@@ -22,16 +19,20 @@ Redmine::Plugin.register :redmine_chart do
   
   # アカウントメニュー追加  
   menu :project_menu, :redmine_chart , 
-  {:controller =>'redmine_chart', :action =>'index'},
-   :param => :project_id, 
-   :caption => :label_redmine_chart, 
-   :after => :gantt,
-   :if => Proc.new{User.current.logged? && Setting.plugin_redmine_chart['show_account_menu']}
+    {:controller =>'redmine_chart', :action =>'index'},
+    :param => :project_id, 
+    :caption => :label_redmine_chart, 
+    :after => :gantt
   
   # プロジェクトメニュー追加  
   menu :account_menu, :redmine_chart , 
-  {:controller =>'redmine_chart', :action =>'index'}, 
-  :caption => :label_redmine_chart, 
-  :after => :my_account
+    {:controller =>'redmine_chart', :action =>'index'}, 
+    :caption => :label_redmine_chart, 
+    :after => :my_account,
+    :if => Proc.new{User.current.logged? && Setting.plugin_redmine_chart['show_account_menu']}
+
+  # プラグイン設定表示 アカウントメニューの表示条件
+  settings :default =>{ 'show_account_menu' => 'true'},
+    :partial =>'settings/redmine_chart_settings'
 
 end
