@@ -104,8 +104,8 @@ class RedmineChartController < ApplicationController
 private
   def find_project
       @project = Project.find(params[:project_id])
-  #rescue ActiveRecord::RecordNotFound
-  #    render_404
+  rescue ActiveRecord::RecordNotFound
+      render_404
   end
   def find_redmine_chart
      @redmine_chart = RedmineChart.find_by_id(params[:id]);
@@ -114,8 +114,8 @@ private
   # 選択project 取得
   def select_project
      find_project
-	 if @project == nil then
-	 @project = 1
+	 if @project.nil? then
+	 @project = Project.first 
 	 end
   end
   # 選択version 取得
