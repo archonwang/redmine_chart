@@ -7,16 +7,31 @@ class RedmineChartController < ApplicationController
   # :
 
   def index
+    find_project
+ 
     @name ='name get!!'
     @days = Setting.activity_days_default.to_i
     @date_to ||= Date.today + 1
     @crnt_uname = User.current.login
     @crnt_uid = User.current.id
+   
+    @prj_list_cnt = [[ "id","count" ]]
+    
+    @all_assigned_list = Issue.where([" assigned_to_id = ?",  @crnt_uid])
+    @all_assigned = @all_assigned_list.count
+    
+    last =Project.last.id
+    (1..last).each{ |prjid|
+      
+     @assigned_prj=@all_assigned_list.joins("INNER JOIN projects prj on prj.id = issues.project_id ").where(project_id: prjid )
+     @prj_list_cnt[prjid]=[Project.find(prjid).name , @assigned_prj.where(project_id: prjid ).count]
+    }
+
+    @status_list_cnt = [[ "id","count" ]]
     @assigned_list = Issue.where(["project_id = ? AND assigned_to_id = ?", @project, @crnt_uid])
                   
     @assigned = @assigned_list.count
     @open = @assigned_list.open.count
-    @status_list_cnt = [[ "id","count" ]]
     last = IssueStatus.last.id
     (1..last).each{ | stslist |
      @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist )
@@ -33,7 +48,17 @@ class RedmineChartController < ApplicationController
       data:   @status_list_cnt
     })
     end
+    @prj_list_cnt.shift
 
+    @chart2 = LazyHighCharts::HighChart.new('pie') do |f|
+    f.chart2({defaultSeriesType: 'pie', margin: [50, 200, 60, 170]})
+    f.series({
+      type: 'pie',
+      name: 'Issues',
+      data:  @prj_list_cnt
+    })
+    end
+    
     category = [1,3,5,7]
     current_quantity = [1000,5000,3000,8000]
 
