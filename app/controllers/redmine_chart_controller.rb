@@ -19,7 +19,7 @@ class RedmineChartController < ApplicationController
     @crnt_uid = User.current.id
    
     @prj_list_cnt = [[ "id","count" ]]
-    
+        get_project_issues 
 	get_answering_issues(" assigned_to_id = ?",  @crnt_uid )
 	@all_assigned_list = @answering_issuses
     #@all_assigned_list = Issue.where([" assigned_to_id = ?",  @crnt_uid])
@@ -122,9 +122,13 @@ private
   def select_version
 	@versions =@project.versions.sort
   end
+  #  該当プロジェクトチケットデータ取得
+  def get_project_issues
+        @project_issues =  Issue.where(["project_id = ? ", @project])
+  end
   # 該当チケットデータ取得
   def get_answering_issues( key,  id )
-	@answering_issuses = Issue.where([ key, id ])
+	@answering_issuses = @project_issues.where([ key, id ])
   end
   # データ開始日
   def find_issues_start_date
