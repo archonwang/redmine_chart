@@ -12,17 +12,16 @@ class RedmineChartController < ApplicationController
 
   def index
  
-    @name ='name get!!'
-    @days = Setting.activity_days_default.to_i
-    @date_to ||= Date.today + 1
+    @today = DateTime.now
+    @start_date = @project.start_date
+    
     @crnt_uname = User.current.login
     @crnt_uid = User.current.id
    
     @prj_list_cnt = [[ "id","count" ]]
-        get_project_issues 
-	get_answering_issues(" assigned_to_id = ?",  @crnt_uid )
-	@all_assigned_list = @answering_issuses
-    #@all_assigned_list = Issue.where([" assigned_to_id = ?",  @crnt_uid])
+    get_project_issues 
+    get_answering_issues(" assigned_to_id = ?",  @crnt_uid )
+    @all_assigned_list = @answering_issuses
     @all_assigned = @all_assigned_list.count
     
     last =Project.last.id

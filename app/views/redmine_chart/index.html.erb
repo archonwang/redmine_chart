@@ -1,8 +1,9 @@
 <%= javascript_include_tag 'highcharts.js', :plugin => 'redmine_chart' %>
 <h2><%= l(:label_redmine_chart_index_prj_menu) %></h2>
-<%= format_date(@date_to -@days)%> <%= l(:label_redmine_chart_index_start_day) %><br>
-<%= format_date(@date_to)%> <%= l(:label_redmine_chart_index_past_days) %><br>
+<%= @start_date %> <%= l(:label_redmine_chart_index_start_day) %><br>
+<%= format_date(@today) %> <%= l(:label_redmine_chart_index_past_days) %><br>
 <%= @project %>
+<%= @project.start_date %>
 <br>
 <h3><%= @crnt_uname%><%= l(:label_redmine_chart_index_tickets_for) %></h3>
 <p>
