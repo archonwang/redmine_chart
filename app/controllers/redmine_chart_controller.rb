@@ -1,13 +1,16 @@
 class RedmineChartController < ApplicationController
   unloadable
   menu_item :redmine_chart
-  #before_filter :find_project, :authorize
-  before_filter :find_project, :require_login
-  before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview]
   # :
+  helper :issues
+  include IssuesHelper
+  
+  
+  #before_filter :find_project, :authorize
+  before_filter :select_project, :require_login
+  before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview]
 
   def index
-    find_project
  
     @name ='name get!!'
     @days = Setting.activity_days_default.to_i
@@ -17,7 +20,9 @@ class RedmineChartController < ApplicationController
    
     @prj_list_cnt = [[ "id","count" ]]
     
-    @all_assigned_list = Issue.where([" assigned_to_id = ?",  @crnt_uid])
+	get_answering_issues(" assigned_to_id = ?",  @crnt_uid )
+	@all_assigned_list = @answering_issuses
+    #@all_assigned_list = Issue.where([" assigned_to_id = ?",  @crnt_uid])
     @all_assigned = @all_assigned_list.count
     
     last =Project.last.id
@@ -99,11 +104,32 @@ class RedmineChartController < ApplicationController
 private
   def find_project
       @project = Project.find(params[:project_id])
-  rescue ActiveRecord::RecordNotFound
-      render_404
+  #rescue ActiveRecord::RecordNotFound
+  #    render_404
   end
   def find_redmine_chart
      @redmine_chart = RedmineChart.find_by_id(params[:id]);
      render_404 unless @redmine_chart
+  end
+  # 選択project 取得
+  def select_project
+     find_project
+	 if @project == nil then
+	 @project = 1
+	 end
+  end
+  # 選択version 取得
+  def select_version
+	@versions =@project.versions.sort
+  end
+  # 該当チケットデータ取得
+  def get_answering_issues( key,  id )
+	@answering_issuses = Issue.where([ key, id ])
+  end
+  # データ開始日
+  def find_issues_start_date
+  end
+  # データ終了日
+  def find_issues_end_date
   end
 end
