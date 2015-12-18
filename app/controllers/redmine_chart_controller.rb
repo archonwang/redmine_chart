@@ -11,17 +11,24 @@ class RedmineChartController < ApplicationController
   before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview]
 
   def index
+    # プロジェクトメニュー表示
+    
     @today = Date.today
     @due_date = @project.due_date
     @start_date = @project.start_date
     
+    # ログインユーザー取得
     @crnt_uname = User.current.login
     @crnt_uid = User.current.id
-   
-    @prj_list_cnt = [[ "id","count" ]]
-    get_project_issues 
-    get_answering_issues(" assigned_to_id = ?",  @crnt_uid )
-    @all_assigned_list = @answering_issuses
+
+    # プロジェクトチケットリスト取得　@
+    get_project_issues # @project_issuesを取得してくる
+
+    # プロジェクト別ユーザの担当チケット数 project count
+    @prj_list_cnt = []
+    
+    get_filter_issues(" assigned_to_id = ?",  @crnt_uid )
+    @all_assigned_list = @filter_issues 
     @all_assigned = @all_assigned_list.count
     
     Project.all.each{ |prjobj|
@@ -29,18 +36,20 @@ class RedmineChartController < ApplicationController
      @prj_list_cnt[prjobj.id]=[Project.find(prjobj.id).name , @assigned_prj.where(project_id: prjobj.id ).count]
     }
 
-    @status_list_cnt = [[ "id","count" ]]
-    @assigned_list = Issue.where(["project_id = ? AND assigned_to_id = ?", @project, @crnt_uid])
-                  
+    # プロジェクトの担当チケットステータス数　status_count
+    
+    get_answering_issues( "assigned_to_id = ?", @crnt_uid)
+    @assigned_list = @answering_issuses
+    @status_list_cnt = []              
     @assigned = @assigned_list.count
     @open = @assigned_list.open.count
     IssueStatus.all.each{ | stslist |
     @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist.id )
      @status_list_cnt[stslist.id]= [IssueStatus.find(stslist.id).name , @assigned_stats.where(status_id: stslist.id ).count]
    }
-     @status_list_cnt.shift
      
-
+    # 円グラフ
+     # status_count
     @chart = LazyHighCharts::HighChart.new('pie') do |f|
     f.chart({defaultSeriesType: 'pie', margin: [50, 200, 60, 170]})
     f.series({
@@ -49,8 +58,7 @@ class RedmineChartController < ApplicationController
       data:   @status_list_cnt
     })
     end
-    @prj_list_cnt.shift
-
+     # project count
     @chart2 = LazyHighCharts::HighChart.new('pie') do |f|
     f.chart2({defaultSeriesType: 'pie', margin: [50, 200, 60, 170]})
     f.series({
@@ -60,6 +68,7 @@ class RedmineChartController < ApplicationController
     })
     end
     
+    # 折れ線グラフ
     category = [1,3,5,7]
     current_quantity = [1000,5000,3000,8000]
 
@@ -69,6 +78,7 @@ class RedmineChartController < ApplicationController
       f.series(name: '在庫数', data: current_quantity)
     end
 	
+	# 折れ線と棒グラフMIX
 	@multiple = LazyHighCharts::HighChart.new('graph') do |f|
         f.title(:text => "Population vs GDP For 5 Big Countries [2009]")
         f.xAxis(:categories => ["United States", "Japan", "China", "Germany", "France"])
@@ -124,7 +134,11 @@ private
   def get_project_issues
         @project_issues =  Issue.where(["project_id = ? ", @project])
   end
-  # 該当チケットデータ取得
+  #  該当チケットデータ取得
+  def get_filter_issues( key,  id )
+        @filter_issues =  Issue.where([ key, id ])
+  end
+  # プロジェクト該当チケットデータ取得
   def get_answering_issues( key,  id )
 	@answering_issuses = @project_issues.where([ key, id ])
   end
