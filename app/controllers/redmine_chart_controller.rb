@@ -33,7 +33,7 @@ class RedmineChartController < ApplicationController
     
     Project.all.each{ |prjobj|
      @assigned_prj=@all_assigned_list.joins("INNER JOIN projects prj on prj.id = issues.project_id ").where(project_id: prjobj.id )
-     @prj_list_cnt[prjobj.id]=[Project.find(prjobj.id).name , @assigned_prj.where(project_id: prjobj.id ).count]
+     @prj_list_cnt[prjobj.id-1]=[Project.find(prjobj.id).name , @assigned_prj.where(project_id: prjobj.id ).count]
     }
 
     # プロジェクトの担当チケットステータス数　status_count
@@ -45,7 +45,7 @@ class RedmineChartController < ApplicationController
     @open = @assigned_list.open.count
     IssueStatus.all.each{ | stslist |
     @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist.id )
-     @status_list_cnt[stslist.id]= [IssueStatus.find(stslist.id).name , @assigned_stats.where(status_id: stslist.id ).count]
+     @status_list_cnt[stslist.id-1]= [IssueStatus.find(stslist.id).name , @assigned_stats.where(status_id: stslist.id ).count]
    }
      
     # 円グラフ
