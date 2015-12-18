@@ -11,8 +11,8 @@ class RedmineChartController < ApplicationController
   before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview]
 
   def index
- 
-    @today = DateTime.now
+    @today = Date.today
+    @due_date = @project.due_date
     @start_date = @project.start_date
     
     @crnt_uname = User.current.login
@@ -98,11 +98,13 @@ class RedmineChartController < ApplicationController
     render :partial => 'common/preview'
   end
 private
+  # project id 取得
   def find_project
       @project = Project.find(params[:project_id])
   rescue ActiveRecord::RecordNotFound
       render_404
   end
+  # plugin のid 取得
   def find_redmine_chart
      @redmine_chart = RedmineChart.find_by_id(params[:id]);
      render_404 unless @redmine_chart
