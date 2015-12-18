@@ -33,7 +33,7 @@ class RedmineChartController < ApplicationController
     
     Project.all.each{ |prjobj|
      @assigned_prj=@all_assigned_list.joins("INNER JOIN projects prj on prj.id = issues.project_id ").where(project_id: prjobj.id )
-     @prj_list_cnt <<[Project.find(prjobj.id).name , @assigned_prj.where(project_id: prjobj.id ).count]
+     @prj_list_cnt << [Project.find(prjobj.id).name , @assigned_prj.where(project_id: prjobj.id ).count]
     }
 
     # プロジェクトの担当チケットステータス数　status_count
@@ -92,28 +92,22 @@ class RedmineChartController < ApplicationController
 	f.chart({:defaultSeriesType=> 'line'})
         # いずれイメージ出力するf.exporting(:enabled=>true,:filename=>"multi.png")
     end
-	# 折れ線と棒グラフMIX
+	# 棒グラフ
 	
-	@spent_time_arry = (@start_date..@due_date)
 	@date_by_count=[]
-	@spent_time_arry.all.each{ |index_date|
-	   @date_by_count <<  @assigned_list.where(start_date : index_date).count
+        @term_arry=[]
+	(@start_date.to_date..@due_date.to_date.to_date).each{ |index_date|
+	   @date_by_count <<  @assigned_list.where( start_date: index_date).count
+           @term_arry << index_date
 	}
 	
-	@multiple = LazyHighCharts::HighChart.new('graph') do |f|
+	@multiple2 = LazyHighCharts::HighChart.new('colum') do |f|
         f.title(:text =>@crnt_uname+"チケット一覧" )
-        f.xAxis(:categories =>@spent_time_arry )
-        f.series(:name => "件数", :yAxis => @start_date, :data => @date_by_count , type: 'column')
-        f.series(:name => "Population in Millions", :yAxis => 1, :data => [310, 127, 1340, 81, 65])
-        f.yAxis [
-          {:title => {:text => "GDP in Billions", :margin => 70} },
-          {:title => {:text => "Population in Millions"}, :opposite => true},
-        ]
-        f.legend(:align => 'right', :verticalAlign => 'top', :y => 75, :x => -50, :layout => 'vertical',)
-	f.chart({:defaultSeriesType=> 'line'})
-	@assigned_stats
-	
-        # いずれイメージ出力するf.exporting(:enabled=>true,:filename=>"multi.png")
+        f.xAxis(:categories =>@term_arry )
+        f.yAxis(:min => 0 ,:text=> "日にち")
+        f.series(:name => "件数", :data => @date_by_count )
+        f.options[:chart][:defaultSeriesType] = "column"
+        f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
   end
 
