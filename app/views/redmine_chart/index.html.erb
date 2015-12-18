@@ -1,8 +1,8 @@
 <%= javascript_include_tag 'highcharts.js', :plugin => 'redmine_chart' %>
-<h2><%= l(:label_redmine_chart_index_prj_menu) %></h2>
+<h2><%= l(:label_redmine_chart_index_prj_menu) %>&ensp;(<%= @today %>)</h2>
 <%= @start_date %> <%= l(:label_redmine_chart_index_start_day) %><br>
 <%= @due_date %> <%= l(:label_redmine_chart_index_past_days) %><br>
-<h3><%= @project %> <%= today %></h3>
+<h3><%= @project %> <%= @today %></h3>
 <br>
 <h3><%= @crnt_uname%><%= l(:label_redmine_chart_index_tickets_for) %></h3>
 <p>
