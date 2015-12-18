@@ -24,9 +24,7 @@ class RedmineChartController < ApplicationController
     @all_assigned_list = @answering_issuses
     @all_assigned = @all_assigned_list.count
     
-    last =Project.last.id
-    (1..last).each{ |prjid|
-      
+    Project.all.each{ |prjid|
      @assigned_prj=@all_assigned_list.joins("INNER JOIN projects prj on prj.id = issues.project_id ").where(project_id: prjid )
      @prj_list_cnt[prjid]=[Project.find(prjid).name , @assigned_prj.where(project_id: prjid ).count]
     }
@@ -36,9 +34,8 @@ class RedmineChartController < ApplicationController
                   
     @assigned = @assigned_list.count
     @open = @assigned_list.open.count
-    last = IssueStatus.last.id
-    (1..last).each{ | stslist |
-     @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist )
+    IssueStatus.all.each{ | stslist |
+    @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist )
      @status_list_cnt[stslist]= [IssueStatus.find(stslist).name , @assigned_stats.where(status_id: stslist ).count]
    }
      @status_list_cnt.shift
