@@ -33,7 +33,7 @@ class RedmineChartController < ApplicationController
     
     Project.all.each{ |prjobj|
      @assigned_prj=@all_assigned_list.joins("INNER JOIN projects prj on prj.id = issues.project_id ").where(project_id: prjobj.id )
-     @prj_list_cnt[prjobj.id-1]=[Project.find(prjobj.id).name , @assigned_prj.where(project_id: prjobj.id ).count]
+     @prj_list_cnt <<[Project.find(prjobj.id).name , @assigned_prj.where(project_id: prjobj.id ).count]
     }
 
     # プロジェクトの担当チケットステータス数　status_count
@@ -45,7 +45,7 @@ class RedmineChartController < ApplicationController
     @open = @assigned_list.open.count
     IssueStatus.all.each{ | stslist |
     @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist.id )
-     @status_list_cnt[stslist.id-1]= [IssueStatus.find(stslist.id).name , @assigned_stats.where(status_id: stslist.id ).count]
+     @status_list_cnt << [IssueStatus.find(stslist.id).name , @assigned_stats.where(status_id: stslist.id ).count]
    }
      
     # 円グラフ
@@ -90,6 +90,29 @@ class RedmineChartController < ApplicationController
         ]
         f.legend(:align => 'right', :verticalAlign => 'top', :y => 75, :x => -50, :layout => 'vertical',)
 	f.chart({:defaultSeriesType=> 'line'})
+        # いずれイメージ出力するf.exporting(:enabled=>true,:filename=>"multi.png")
+    end
+	# 折れ線と棒グラフMIX
+	
+	@spent_time_arry = (@start_date..@due_date)
+	@date_by_count=[]
+	@spent_time_arry.all.each{ |index_date|
+	   @date_by_count <<  @assigned_list.where(start_date : index_date).count
+	}
+	
+	@multiple = LazyHighCharts::HighChart.new('graph') do |f|
+        f.title(:text =>@crnt_uname+"チケット一覧" )
+        f.xAxis(:categories =>@spent_time_arry )
+        f.series(:name => "件数", :yAxis => @start_date, :data => @date_by_count , type: 'column')
+        f.series(:name => "Population in Millions", :yAxis => 1, :data => [310, 127, 1340, 81, 65])
+        f.yAxis [
+          {:title => {:text => "GDP in Billions", :margin => 70} },
+          {:title => {:text => "Population in Millions"}, :opposite => true},
+        ]
+        f.legend(:align => 'right', :verticalAlign => 'top', :y => 75, :x => -50, :layout => 'vertical',)
+	f.chart({:defaultSeriesType=> 'line'})
+	@assigned_stats
+	
         # いずれイメージ出力するf.exporting(:enabled=>true,:filename=>"multi.png")
     end
   end
