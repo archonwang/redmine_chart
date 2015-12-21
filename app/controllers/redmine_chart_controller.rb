@@ -96,16 +96,21 @@ class RedmineChartController < ApplicationController
 	
 	@date_by_count=[]
         @term_arry=[]
+        @term_by_count=[]
 	(@start_date.to_date..@due_date.to_date.to_date).each{ |index_date|
 	   @date_by_count <<  @assigned_list.where( start_date: index_date).count
            @term_arry << index_date
+           @term_by_count << @date_by_count.sum
 	}
 	
 	@multiple2 = LazyHighCharts::HighChart.new('colum') do |f|
         f.title(:text =>@crnt_uname+"チケット一覧" )
         f.xAxis(:categories =>@term_arry )
-        f.yAxis(:min => 0 ,:text=> "日にち")
-        f.series(:name => "件数", :data => @date_by_count )
+        f.yAxis [
+         {:title =>{:text=> "日数", :margin => 1}},
+        ]        
+        f.series(:name => "件数", :yAxis => 0, :data => @date_by_count )
+        f.series(:name => "累積件数", :yAxis => 0, :data => @term_by_count )
         f.options[:chart][:defaultSeriesType] = "column"
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
