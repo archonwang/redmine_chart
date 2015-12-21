@@ -93,14 +93,32 @@ class RedmineChartController < ApplicationController
         # いずれイメージ出力するf.exporting(:enabled=>true,:filename=>"multi.png")
     end
 	# 棒グラフ
-	
+	 # 経過時間リストからプロジェクトとユーザーに合致するリストをチケット順にソート 
+        @time_entry_list = TimeEntry.where( project_id: @project, user_id: @crnt_uid )
 	@date_by_count=[]
         @term_arry=[]
         @term_by_count=[]
+        @term_estimated_times = 0.0 
+        
 	(@start_date.to_date..@due_date.to_date.to_date).each{ |index_date|
-	   @date_by_count <<  @assigned_list.where( start_date: index_date).count
+           @date_by_tickets = @assigned_list.where( start_date: index_date)
+           # 日別チケット件数 
+	   @date_by_count <<  @date_by_tickets.count
+           # 表示期間の日付
            @term_arry << index_date
+           # 累積チケット件数
            @term_by_count << @date_by_count.sum
+           # 累積予定工数
+           @date_by_tickets.each { |dat|
+               if dat['estimated_hours']!= nil then  
+                @term_estimated_times += dat['estimated_hours']
+               end
+           }
+           # 日別累積作業工数
+           @date_estimated_times = @time_entry_list.where( "updated_on = ?  OR created_on = ?", index_date , index_date)
+          @date_estimated_times.each{ | times |
+             @date_estimated_time << times.hours 
+           }
 	}
 	
 	@multiple2 = LazyHighCharts::HighChart.new('colum') do |f|
@@ -108,7 +126,9 @@ class RedmineChartController < ApplicationController
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
          {:title =>{:text=> "日数", :margin => 1}},
+         {:title =>{:text=> "累積時間"}, :opposite => true },
         ]        
+        f.series(:name => "累積作業工数", :yAxis => 1, :data => @date_estimated_time )
         f.series(:name => "件数", :yAxis => 0, :data => @date_by_count )
         f.series(:name => "累積件数", :yAxis => 0, :data => @term_by_count )
         f.options[:chart][:defaultSeriesType] = "column"
