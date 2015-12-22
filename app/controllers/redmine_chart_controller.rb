@@ -100,7 +100,7 @@ class RedmineChartController < ApplicationController
         @term_by_count=[]
         @term_estimated_times = 0.0 
         
-	(@start_date.to_date..@due_date.to_date.to_date).each{ |index_date|
+	(@start_date.to_date..@today).each{ |index_date|
            @date_by_tickets = @assigned_list.where( start_date: index_date)
            # 日別チケット件数 
 	   @date_by_count <<  @date_by_tickets.count
