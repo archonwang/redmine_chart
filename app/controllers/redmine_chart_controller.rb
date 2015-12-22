@@ -94,7 +94,11 @@ class RedmineChartController < ApplicationController
     end
 	# 棒グラフ
 	 # 経過時間リストからプロジェクトとユーザーに合致するリストをチケット順にソート 
-        @time_entry_list = TimeEntry.where( project_id: @project, user_id: @crnt_uid )
+         @time_entry_list = TimeEntry.where(["spent_on>=:first_date and spent_on<=:last_date",{:first_date=>@start_date, :last_date=>@today }])
+         @assigned_list.each{ |asiss|
+            @time_entries = @time_entry_list.where( issue_id: asiss[:id])
+         }
+
 	@date_by_count=[]
         @term_arry=[]
         @term_by_count=[]
@@ -115,23 +119,29 @@ class RedmineChartController < ApplicationController
                end
            }
            # 日別累積作業工数
-           @date_estimated_times = @time_entry_list.where( "updated_on = ?  OR created_on = ?", index_date , index_date)
-          @date_estimated_times.each{ | times |
-             @date_estimated_time << times.hours 
+           @date_estimated_time=[]
+          
+           @time_entry_list.each{ | times |
+             if  times.nil? then
+               @date_estimated_time << 0.0
+             else
+               @date_estimated_time << times['hours']
+             end
            }
 	}
 	
-	@multiple2 = LazyHighCharts::HighChart.new('colum') do |f|
+	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
         f.title(:text =>@crnt_uname+"チケット一覧" )
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
          {:title =>{:text=> "日数", :margin => 1}},
          {:title =>{:text=> "累積時間"}, :opposite => true },
         ]        
+        f.series(:name => "件数", :yAxis => 0, :data => @date_by_count,:type => 'column' )
+        f.series(:name => "累積件数", :yAxis => 0, :data => @term_by_count,:type => 'column' )
         f.series(:name => "累積作業工数", :yAxis => 1, :data => @date_estimated_time )
-        f.series(:name => "件数", :yAxis => 0, :data => @date_by_count )
-        f.series(:name => "累積件数", :yAxis => 0, :data => @term_by_count )
-        f.options[:chart][:defaultSeriesType] = "column"
+        #f.options[:chart][:defaultSeriesType] = "column"
+        f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
   end
