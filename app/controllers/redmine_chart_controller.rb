@@ -93,17 +93,24 @@ class RedmineChartController < ApplicationController
         # いずれイメージ出力するf.exporting(:enabled=>true,:filename=>"multi.png")
     end
 	# 棒グラフ
-	 # 経過時間リストからプロジェクトとユーザーに合致するリストをチケット順にソート 
-         @time_entry_list = TimeEntry.where(["spent_on>=:first_date and spent_on<=:last_date",{:first_date=>@start_date, :last_date=>@today }])
-         @assigned_list.each{ |asiss|
-            @time_entries = @time_entry_list.where( issue_id: asiss[:id])
-         }
+	 # 経過時間リストからプロジェクトとユーザーに合致するリストをチケット順にソート
+         #@time_entries =[]
+         #@time_entry_list = TimeEntry.where(["spent_on>=:first_date and spent_on<=:last_date",{:first_date=>@start_date, :last_date=>@today }])
+         #@assigned_list.each{ |asiss|
+         #    @time_entries << @time_entry_list.where(["issue_id !=:asid",{:asid=>asiss[:id]}])
+         #}
+         #@time_entries = TimeEntry.
+         #                #includes(@assigned_list).
+         #                where(["user_id=:uid and spent_on>=:day1 and spent_on<=:day2",
+         #                {:uid => @crnt_uid, :day1 => @start_date, :day2 => @today }]).all
 
 	@date_by_count=[]
         @term_arry=[]
         @term_by_count=[]
         @term_estimated_times = 0.0 
-        
+        # 日別累積作業工数
+        @date_estimated_time=[]
+        @date_spent_time=[]
 	(@start_date.to_date..@today).each{ |index_date|
            @date_by_tickets = @assigned_list.where( start_date: index_date)
            # 日別チケット件数 
@@ -118,16 +125,24 @@ class RedmineChartController < ApplicationController
                 @term_estimated_times += dat['estimated_hours']
                end
            }
-           # 日別累積作業工数
-           @date_estimated_time=[]
-          
-           @time_entry_list.each{ | times |
-             if  times.nil? then
+           # 日別累積作業工数算出
+           @time_entries = TimeEntry.
+                         #includes(@assigned_list).
+                         where(["user_id=:uid and updated_on <=:day1 and project_id=:pid ",
+                         {:uid => @crnt_uid, :day1 => index_date.to_time.to_date ,:pid => @project }]).all
+            #  工数の入力がなければ0.0を代入
+            if @time_entries.count == 0 then
                @date_estimated_time << 0.0
-             else
-               @date_estimated_time << times['hours']
-             end
-           }
+            else
+                date_sum = 0
+                @time_entries.each{ |entry|
+                     date_sum += entry[:hours]
+                }
+                @date_estimated_time << date_sum
+            end
+
+            #   
+            #@date_spent_time <<  @term_estimated_times - @date_estimated_time
 	}
 	
 	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
@@ -140,6 +155,7 @@ class RedmineChartController < ApplicationController
         f.series(:name => "件数", :yAxis => 0, :data => @date_by_count,:type => 'column' )
         f.series(:name => "累積件数", :yAxis => 0, :data => @term_by_count,:type => 'column' )
         f.series(:name => "累積作業工数", :yAxis => 1, :data => @date_estimated_time )
+        f.series(:name => "累積残工数", :yAxis => 1, :data => @date_spent_time )
         #f.options[:chart][:defaultSeriesType] = "column"
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
