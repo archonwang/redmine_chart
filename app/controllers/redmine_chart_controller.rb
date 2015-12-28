@@ -128,7 +128,8 @@ class RedmineChartController < ApplicationController
            # 日別累積作業工数算出
            @time_entries = TimeEntry.
                          #includes(@assigned_list).
-                         where(["user_id=:uid and updated_on <=:day1 and project_id=:pid ",
+                         #where(["user_id=:uid and updated_on <=:day1 and project_id=:pid ",
+                         where(["user_id=:uid and spent_on <=:day1 and project_id=:pid ",
                          {:uid => @crnt_uid, :day1 => index_date.to_time.to_date ,:pid => @project }]).all
             #  工数の入力がなければ0.0を代入
             if @time_entries.count == 0 then
@@ -142,7 +143,7 @@ class RedmineChartController < ApplicationController
             end
 
             #   
-            #@date_spent_time <<  @term_estimated_times - @date_estimated_time
+            @date_spent_time <<  @term_estimated_times - @date_estimated_time.last.to_f
 	}
 	
 	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
