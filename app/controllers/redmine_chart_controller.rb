@@ -115,11 +115,9 @@ class RedmineChartController < ApplicationController
            @date_by_tickets.each { |dat|
                if dat['estimated_hours']!= nil then  
                 @term_estimated_times += dat['estimated_hours']
-                @term_estimated_time << @term_estimated_times
-               else
-                @term_estimated_time << 0.0
                end
            }
+           @term_estimated_time << @term_estimated_times
            # 日別累積作業工数算出
            @time_entries = TimeEntry.
                          where(["user_id=:uid and spent_on <=:day1 and project_id=:pid ",
