@@ -34,7 +34,14 @@ spent  userid  issue_id updated <br>
 <p>
 <%= @term_estimated_times %>
 <p>
-***<%=@all_due_date%>all due<br>
+last term date <%=@all_last_due_date[:due_date]%><br>
+first term date <%=@all_first_due_date[:start_date]%>
+<br>
+term date <%=@term_date%>
+<br>
+per date <%=@minas%>
+<br>
+::::
 **<%= @time_entries.count%>
 *<%= @time_entries%>
 <div class="contextual">

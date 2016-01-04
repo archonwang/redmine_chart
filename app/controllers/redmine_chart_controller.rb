@@ -12,7 +12,7 @@ class RedmineChartController < ApplicationController
   before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview]
 
   def index
-    # プロジェクトメニュー表示
+   # プロジェクトメニュー表示
     
     @today = Date.today
     @due_date = @project.due_date
@@ -102,8 +102,17 @@ class RedmineChartController < ApplicationController
         @term_estimated_time =[]    # 期間予定工数
         @date_estimated_time=[]     # 日別予定工数
         @date_spent_time=[]         # 日別残工数
-    # 描画開始日から終了日までのチケット詳細
+        @date_plan_times=[]
+        # 予定工数調整
+            @all_last_due_date = @assigned_list.order("due_date DESC").first
+            @all_first_due_date =@assigned_list.order("start_date ").first
+            diff_date = @all_last_due_date[:due_date]- @all_first_due_date[:start_date]
+            @term_date = diff_date.to_i
+            @minas =@term_estimated_times/@term_date
+            num = 0.0
+        # 描画開始日から終了日までのチケット詳細
 	(@start_date.to_date..@today).each{ |index_date|
+           num+=1
            # 開始日該当チケット抽出
            @date_by_tickets = @assigned_list.where( start_date: index_date)
            # 日別チケット件数 
@@ -136,9 +145,7 @@ class RedmineChartController < ApplicationController
 
             # 日別残工数
             @date_spent_time <<  @term_estimated_times - @date_estimated_time.last.to_f
-            # 予定工数調整
-            @all_due_date = @assigned_list.order("due_date").first.value
-            
+            @date_plan_times <<  @term_estimated_times - (@minas*num).to_f    
 	}
 	
 	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
@@ -165,7 +172,7 @@ class RedmineChartController < ApplicationController
          {:title =>{:text=> "累積時間"}, :opposite => true },
         ]        
         f.series(:name => "累積作業工数", :yAxis => 0, :data => @date_estimated_time )
-        f.series(:name => "累積残工数", :yAxis => 0, :data => @date_spent_time )
+        f.series(:name => "予定作業工数", :yAxis => 0, :data => @date_plan_times )
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
