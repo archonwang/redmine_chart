@@ -20,6 +20,10 @@
 <%= high_chart("mix2", @multiple2) %>
 </div>
 <p>
+<div style="width: 100%; height: 600px">
+<%= high_chart("mix3", @multiple3) %>
+</div>
+<p>
 spent  userid  issue_id updated <br>
 <% @time_entries.each do | entr | -%>
 <%=entr[:hours]%>
@@ -30,6 +34,7 @@ spent  userid  issue_id updated <br>
 <p>
 <%= @term_estimated_times %>
 <p>
+***<%=@all_due_date%>all due<br>
 **<%= @time_entries.count%>
 *<%= @time_entries%>
 <div class="contextual">

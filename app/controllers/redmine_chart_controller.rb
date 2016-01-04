@@ -4,6 +4,7 @@ class RedmineChartController < ApplicationController
   # :
   helper :issues
   include IssuesHelper
+
   
   
   #before_filter :find_project, :authorize
@@ -92,7 +93,7 @@ class RedmineChartController < ApplicationController
 	f.chart({:defaultSeriesType=> 'line'})
         # いずれイメージ出力するf.exporting(:enabled=>true,:filename=>"multi.png")
     end
-	# BurnDown Chart
+	# BurnUp Chart
  	    # 経過時間リストからプロジェクトとユーザーに合致するリストをチケット順にソート
         @date_by_count=[]           # 日別チケット件数
         @term_arry=[]               # 期間日付配列
@@ -135,6 +136,9 @@ class RedmineChartController < ApplicationController
 
             # 日別残工数
             @date_spent_time <<  @term_estimated_times - @date_estimated_time.last.to_f
+            # 予定工数調整
+            @all_due_date = @assigned_list.order("due_date").first.value
+            
 	}
 	
 	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
@@ -150,6 +154,18 @@ class RedmineChartController < ApplicationController
         f.series(:name => "累積作業工数", :yAxis => 1, :data => @date_estimated_time )
         f.series(:name => "累積残工数", :yAxis => 1, :data => @date_spent_time )
         #f.options[:chart][:defaultSeriesType] = "column"
+        f.chart({:defaultSeriesType=> 'line'})
+        f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
+    end
+    # BurnDown Chart
+	@multiple3 = LazyHighCharts::HighChart.new('graph') do |f|
+        f.title(:text =>@crnt_uname+"BurnDownチャート" )
+        f.xAxis(:categories =>@term_arry )
+        f.yAxis [
+         {:title =>{:text=> "累積時間"}, :opposite => true },
+        ]        
+        f.series(:name => "累積作業工数", :yAxis => 0, :data => @date_estimated_time )
+        f.series(:name => "累積残工数", :yAxis => 0, :data => @date_spent_time )
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
