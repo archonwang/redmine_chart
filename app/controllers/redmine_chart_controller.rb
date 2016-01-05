@@ -104,15 +104,14 @@ class RedmineChartController < ApplicationController
         @date_spent_time=[]         # 日別残工数
         @date_plan_times=[]
         # 予定工数調整
-            @all_last_due_date = @assigned_list.order("due_date DESC").first
-            @all_first_due_date =@assigned_list.order("start_date ").first
-            diff_date = @all_last_due_date[:due_date]- @all_first_due_date[:start_date]
-            @term_date = diff_date.to_i
-            @minas =@term_estimated_times/@term_date
-            num = 0.0
+            @all_last_due_date = @assigned_list.order("due_date DESC").first[:due_date]
+            @all_first_due_date =@assigned_list.order("start_date ").first[:start_date]
+            @term_date= (@all_last_due_date - @all_first_due_date).to_i
+            @num = 0.0
         # 描画開始日から終了日までのチケット詳細
-	(@start_date.to_date..@today).each{ |index_date|
-           num+=1
+	#(@start_date.to_date..@today).each{ |index_date|
+	(@all_first_due_date..@all_last_due_date).each{ |index_date|
+           @num+=1
            # 開始日該当チケット抽出
            @date_by_tickets = @assigned_list.where( start_date: index_date)
            # 日別チケット件数 
@@ -144,8 +143,10 @@ class RedmineChartController < ApplicationController
             end
 
             # 日別残工数
+            
+            @minas =@term_estimated_times.quo(@term_date).to_f
             @date_spent_time <<  @term_estimated_times - @date_estimated_time.last.to_f
-            @date_plan_times <<  @term_estimated_times - (@minas*num).to_f    
+            @date_plan_times <<  @term_estimated_times - (@minas*@num).to_f    
 	}
 	
 	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
