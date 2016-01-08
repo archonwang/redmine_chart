@@ -3,13 +3,14 @@ class RedmineChartController < ApplicationController
   menu_item :redmine_chart
   # :
   helper :issues
+  helper :queries
   include IssuesHelper
-
+  include QueriesHelper
   
   
   #before_filter :find_project, :authorize
   before_filter :select_project, :require_login
-  before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview]
+  before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview, :show ]
 
   def index
    # プロジェクトメニュー表示
@@ -182,6 +183,9 @@ class RedmineChartController < ApplicationController
   end
 
   def show
+  retrieve_query
+  get_project_dates
+    
   end
 
   def edit
@@ -213,6 +217,11 @@ private
   # 選択version 取得
   def select_version
 	@versions =@project.versions.sort
+  end
+  #  該当プロジェクト日付データ取得
+  def get_project_dates
+    @project_due_date = @project.due_date
+    @project_start_date = @project.start_date   
   end
   #  該当プロジェクトチケットデータ取得
   def get_project_issues

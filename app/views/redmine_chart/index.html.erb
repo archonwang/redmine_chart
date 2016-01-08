@@ -44,10 +44,14 @@ per date <%=@minas%>
 ::::
 **<%= @time_entries.count%>
 *<%= @time_entries%>
-<div class="contextual">
-  <%= link_to_if_authorized(l(:label_redmine_chart_new), 
+
+<% content_for :sidebar do %>
+    <%= link_to_if_authorized(l(:label_redmine_chart_new), 
                             {:action => 'new', :project_id => @project}, 
                             :class => 'icon icon-add') %>
-</div>
+    <%= link_to_if_authorized("フィルタ", 
+                            {:action => 'show', :project_id => @project}') %>
+
+<% end %>
 
 
