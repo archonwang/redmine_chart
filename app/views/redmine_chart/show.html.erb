@@ -1,7 +1,5 @@
-<h2>RedmineChartController#show</h2>
-
 project_redmine_chart
-<h2><%= @query.new_record? ? l(:redmine_chart) : @query.name %></h2>
+<h2><%= @query.new_record? ? l(:label_redmine_chart) : @query.name %></h2>
 <%= form_tag({ :controller => 'redmine_chart', :action => 'show', :project_id => @project },
             :method => :get, :id => 'query_form') do %>
   <div id="query_form_with_buttons" class="hide-when-print">
@@ -15,6 +13,7 @@ project_redmine_chart
      </fieldset>
       <fieldset class="collapsible collapsed">
         <legend onclick="toggleFieldset(this);"><%= l(:label_options) %></legend>
+<% if false %>
         #<div>
         #  <table>
         #    <tr>
@@ -27,6 +26,7 @@ project_redmine_chart
         #    </tr>
         #  </table>
         #</div>
+<% end %>
       </fieldset>
     </div>
     <p class="buttons">

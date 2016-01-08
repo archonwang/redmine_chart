@@ -49,9 +49,6 @@ per date <%=@minas%>
     <%= link_to_if_authorized(l(:label_redmine_chart_new), 
                             {:action => 'new', :project_id => @project}, 
                             :class => 'icon icon-add') %>
-    <%= link_to_if_authorized("フィルタ", 
-                            {:action => 'show', :project_id => @project}') %>
-
 <% end %>
 
 

@@ -10,7 +10,7 @@ class RedmineChartController < ApplicationController
   
   #before_filter :find_project, :authorize
   before_filter :select_project, :require_login
-  before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview, :show ]
+  before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview, :show, ]
 
   def index
    # プロジェクトメニュー表示
