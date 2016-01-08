@@ -11,3 +11,5 @@ en:
   label_redmine_chart_index_tickets_for: "Assigend Ticket"
   label_redmine_chart_index_total: "total"
   label_redmine_chart_new: "New"
+  label_redmine_chart_first_date: "First date"
+  label_redmine_chart_last_date: "Last  date"
