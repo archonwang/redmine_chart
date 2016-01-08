@@ -13,11 +13,27 @@ class RedmineChartController < ApplicationController
   before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview, :show, ]
 
   def index
+
    # プロジェクトメニュー表示
-    
+   @last_date  = params[:date_to]
+   @first_date = params[:date_from]
+
     @today = Date.today
     @due_date = @project.due_date
     @start_date = @project.start_date
+
+    #　描画範囲決定
+    unless @first_date.nil?
+     if @start_date.to_date >= @first_date.to_date then
+        @first_date.to_date = @start_date.to_date
+     end
+    end
+    unless @last_date.nil?
+     if @last_date.to_date >= @today then
+        @last_date.to_date = @today
+     end
+    end
+
     
     # ログインユーザー取得
     @crnt_uname = User.current.login
@@ -113,6 +129,7 @@ class RedmineChartController < ApplicationController
             num = 0.0
         # 描画開始日から終了日までのチケット詳細
 	(@start_date.to_date..@today).each{ |index_date|
+	#(@first_date.to_date..@last_date.to_date).each{ |index_date|
            num+=1
            # 開始日該当チケット抽出
            @date_by_tickets = @assigned_list.where( start_date: index_date)
