@@ -14,6 +14,8 @@ class RedmineChartController < ApplicationController
 
   def index
 
+   retrieve_query
+   get_project_dates
    # プロジェクトメニュー表示
    @last_date  = params[:date_to]
    @first_date = params[:date_from]
@@ -23,17 +25,19 @@ class RedmineChartController < ApplicationController
     @start_date = @project.start_date
 
     #　描画範囲決定
+    @from_date =  @start_date.to_date
     unless @first_date.nil?
-     if @start_date.to_date >= @first_date.to_date then
-        @first_date.to_date = @start_date.to_date
+     if @start_date.to_date <= @first_date.to_date
+        @from_date = @first_date.to_date 
      end
     end
+    @to_date = @today
     unless @last_date.nil?
-     if @last_date.to_date >= @today then
-        @last_date.to_date = @today
+     if @last_date.to_date <= @today then
+        @to_date = @last_date.to_date
      end
     end
-
+     
     
     # ログインユーザー取得
     @crnt_uname = User.current.login
@@ -128,8 +132,8 @@ class RedmineChartController < ApplicationController
             @minas =@term_estimated_times/@term_date
             num = 0.0
         # 描画開始日から終了日までのチケット詳細
-	(@start_date.to_date..@today).each{ |index_date|
-	#(@first_date.to_date..@last_date.to_date).each{ |index_date|
+	#@start_date.to_date..@today).each{ |index_date|
+	(@from_date..@to_date).each{ |index_date|
            num+=1
            # 開始日該当チケット抽出
            @date_by_tickets = @assigned_list.where( start_date: index_date)
