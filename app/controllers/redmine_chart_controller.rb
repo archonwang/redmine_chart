@@ -14,7 +14,8 @@ class RedmineChartController < ApplicationController
 
   def index
 
-   retrieve_query
+   #retrieve_query
+   retrieve_charts_query
    get_project_dates
    # プロジェクトメニュー表示
    @last_date  = params[:date_to]
@@ -261,5 +262,9 @@ private
   end
   # データ終了日
   def find_issues_end_date
+  end
+  def retrieve_charts_query
+	      @query = RedmineChartQuery.new(:name => "_")
+	      @query.project = @project
   end
 end
