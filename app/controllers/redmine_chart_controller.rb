@@ -21,7 +21,9 @@ class RedmineChartController < ApplicationController
    # プロジェクトメニュー表示
    @last_date  = params[:date_to]
    @first_date = params[:date_from]
-
+   @view_id = params[:assigned_to_id]
+   
+   
     @today = Date.today
     @due_date = @project.due_date
     @start_date = @project.start_date
@@ -178,24 +180,24 @@ class RedmineChartController < ApplicationController
 	}
 	
 	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
-        f.title(:text =>@crnt_uname+"チケット一覧" )
+        f.title(:text =>@crnt_uname+l(:label_redmine_chart_issues_story) )
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
-         {:title =>{:text=> "日数", :margin => 1}},
-         {:title =>{:text=> "累積時間"}, :opposite => true },
+         {:title =>{:text=> l(:label_redmine_chart_issues_count), :margin => 1}},
+         {:title =>{:text=> l(:label_redmine_chart_accumulated_time)}, :opposite => true },
         ]        
         f.series(:name => l(:label_redmine_chart_issues_per_date), :yAxis => 0, :data => @date_by_count,:type => 'column' )
         f.series(:name => l(:label_redmine_chart_issues_total), :yAxis => 0, :data => @term_by_count,:type => 'column' )
-        f.series(:name => "累積予定工数", :yAxis => 1, :data => @term_estimated_time )
+        f.series(:name => l(:label_redmine_chart_term_estimated_time), :yAxis => 1, :data => @term_estimated_time )
         f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 1, :data => @date_estimated_time )
-        f.series(:name => "累積残工数", :yAxis => 1, :data => @date_spent_time )
+        #f.series(:name => "累積残工数", :yAxis => 1, :data => @date_spent_time )
         #f.options[:chart][:defaultSeriesType] = "column"
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
     # BurnDown Chart
 	@multiple3 = LazyHighCharts::HighChart.new('graph') do |f|
-        f.title(:text =>@crnt_uname+"BurnDownチャート" )
+        f.title(:text =>@crnt_uname+l(:label_redmine_chart_burn_down)+l(:label_redmine_chart) )
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
          {:title =>{:text=> l(:label_redmine_chart_remaining_time)}, :opposite => true }, 

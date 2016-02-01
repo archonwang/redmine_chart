@@ -2,6 +2,7 @@
 <%= render :partial => 'filter' %>
 <%=l(:label_redmine_chart_first_date) %><%= @first_date%><p>
 <%=l(:label_redmine_chart_last_date) %><%=@last_date%><p>
+<%="設定ID" %><%=@view_id%><p>
 <h2><%= l(:label_redmine_chart_index_prj_menu) %>&ensp;(<%= @today %>)</h2>
 <%= @start_date %> <%= l(:label_redmine_chart_index_start_day) %><br>
 <%= @due_date %> <%= l(:label_redmine_chart_index_past_days) %><br>
