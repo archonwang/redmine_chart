@@ -13,3 +13,10 @@ en:
   label_redmine_chart_new: "New"
   label_redmine_chart_first_date: "First date"
   label_redmine_chart_last_date: "Last  date"
+  label_redmine_chart_ideal_line: "Ideal Work Remaining Line"
+  label_redmine_chart_actual_line: "Actual Work Remaining Line"
+  label_redmine_chart_estimated_time: "estimated time"
+  label_redmine_chart_issues_total: "issues total"
+  label_redmine_chart_issues_per_date: "issues per date"
+  label_redmine_chart_remaining_time: "remaining time"
+  

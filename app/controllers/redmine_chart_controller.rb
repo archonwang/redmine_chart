@@ -17,6 +17,7 @@ class RedmineChartController < ApplicationController
    #retrieve_query
    retrieve_charts_query
    get_project_dates
+   
    # プロジェクトメニュー表示
    @last_date  = params[:date_to]
    @first_date = params[:date_from]
@@ -168,7 +169,12 @@ class RedmineChartController < ApplicationController
             
             @minas =@term_estimated_times.quo(@term_date).to_f
             @date_spent_time <<  @term_estimated_times - @date_estimated_time.last.to_f
-            @date_plan_times <<  @term_estimated_times - (@minas*@num).to_f    
+            calc_est_time = @term_estimated_times - (@minas*@num).to_f
+            if calc_est_time < 0 then
+            	@date_plan_times << 0
+            else
+            	@date_plan_times << calc_est_time
+            end
 	}
 	
 	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
@@ -178,10 +184,10 @@ class RedmineChartController < ApplicationController
          {:title =>{:text=> "日数", :margin => 1}},
          {:title =>{:text=> "累積時間"}, :opposite => true },
         ]        
-        f.series(:name => "件数", :yAxis => 0, :data => @date_by_count,:type => 'column' )
-        f.series(:name => "累積件数", :yAxis => 0, :data => @term_by_count,:type => 'column' )
+        f.series(:name => l(:label_redmine_chart_issues_per_date), :yAxis => 0, :data => @date_by_count,:type => 'column' )
+        f.series(:name => l(:label_redmine_chart_issues_total), :yAxis => 0, :data => @term_by_count,:type => 'column' )
         f.series(:name => "累積予定工数", :yAxis => 1, :data => @term_estimated_time )
-        f.series(:name => "累積作業工数", :yAxis => 1, :data => @date_estimated_time )
+        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 1, :data => @date_estimated_time )
         f.series(:name => "累積残工数", :yAxis => 1, :data => @date_spent_time )
         #f.options[:chart][:defaultSeriesType] = "column"
         f.chart({:defaultSeriesType=> 'line'})
@@ -192,10 +198,10 @@ class RedmineChartController < ApplicationController
         f.title(:text =>@crnt_uname+"BurnDownチャート" )
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
-         {:title =>{:text=> "累積時間"}, :opposite => true },
+         {:title =>{:text=> l(:label_redmine_chart_remaining_time)}, :opposite => true }, 
         ]        
-        f.series(:name => "累積作業工数", :yAxis => 0, :data => @date_estimated_time )
-        f.series(:name => "予定作業工数", :yAxis => 0, :data => @date_plan_times )
+        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 0, :data => @date_spent_time)
+        f.series(:name => l(:label_redmine_chart_ideal_line), :yAxis => 0, :data => @date_plan_times )
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
