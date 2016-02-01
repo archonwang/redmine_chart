@@ -1,4 +1,4 @@
-project_redmine_chart
+
 <h2><%= @query.new_record? ? l(:label_redmine_chart) : @query.name %></h2>
 <%= form_tag({ :controller => 'redmine_chart', :action => 'index', :project_id => @project },
             :method => :get, :id => 'query_form') do %>
@@ -33,3 +33,4 @@ project_redmine_chart
     </p>
   </div>
 <% end %>
+<p>

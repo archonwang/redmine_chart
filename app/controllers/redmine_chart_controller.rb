@@ -3,20 +3,42 @@ class RedmineChartController < ApplicationController
   menu_item :redmine_chart
   # :
   helper :issues
+  helper :queries
   include IssuesHelper
-
+  include QueriesHelper
   
   
   #before_filter :find_project, :authorize
   before_filter :select_project, :require_login
-  before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview]
+  before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview, :show, ]
 
   def index
+
+   #retrieve_query
+   retrieve_charts_query
+   get_project_dates
    # プロジェクトメニュー表示
-    
+   @last_date  = params[:date_to]
+   @first_date = params[:date_from]
+
     @today = Date.today
     @due_date = @project.due_date
     @start_date = @project.start_date
+
+    #　描画範囲決定
+    @from_date =  @start_date.to_date
+    unless @first_date.nil?
+     if @start_date.to_date <= @first_date.to_date
+        @from_date = @first_date.to_date 
+     end
+    end
+    @to_date = @today
+    unless @last_date.nil?
+     if @last_date.to_date <= @today then
+        @to_date = @last_date.to_date
+     end
+    end
+     
     
     # ログインユーザー取得
     @crnt_uname = User.current.login
@@ -183,6 +205,9 @@ class RedmineChartController < ApplicationController
   end
 
   def show
+  retrieve_query
+  get_project_dates
+    
   end
 
   def edit
@@ -215,6 +240,11 @@ private
   def select_version
 	@versions =@project.versions.sort
   end
+  #  該当プロジェクト日付データ取得
+  def get_project_dates
+    @project_due_date = @project.due_date
+    @project_start_date = @project.start_date   
+  end
   #  該当プロジェクトチケットデータ取得
   def get_project_issues
         @project_issues =  Issue.where(["project_id = ? ", @project])
@@ -232,5 +262,9 @@ private
   end
   # データ終了日
   def find_issues_end_date
+  end
+  def retrieve_charts_query
+	      @query = RedmineChartQuery.new(:name => "_")
+	      @query.project = @project
   end
 end

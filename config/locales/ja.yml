@@ -11,4 +11,6 @@ ja:
   label_redmine_chart_index_tickets_for: "さんの担当チケット" 
   label_redmine_chart_index_total: "チケット合計"
   label_redmine_chart_new: "新規作成"
+  label_redmine_chart_first_date: "チャート開始日"
+  label_redmine_chart_last_date: "チャート終了日"
 

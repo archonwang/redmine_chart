@@ -1,5 +1,7 @@
 <%= javascript_include_tag 'highcharts.js', :plugin => 'redmine_chart' %>
-
+<%= render :partial => 'filter' %>
+<%=l(:label_redmine_chart_first_date) %><%= @first_date%><p>
+<%=l(:label_redmine_chart_last_date) %><%=@last_date%><p>
 <h2><%= l(:label_redmine_chart_index_prj_menu) %>&ensp;(<%= @today %>)</h2>
 <%= @start_date %> <%= l(:label_redmine_chart_index_start_day) %><br>
 <%= @due_date %> <%= l(:label_redmine_chart_index_past_days) %><br>
@@ -46,10 +48,11 @@ date <%=@num%>
 ::::
 **<%= @time_entries.count%>
 *<%= @time_entries%>
-<div class="contextual">
-  <%= link_to_if_authorized(l(:label_redmine_chart_new), 
+
+<% content_for :sidebar do %>
+    <%= link_to_if_authorized(l(:label_redmine_chart_new), 
                             {:action => 'new', :project_id => @project}, 
                             :class => 'icon icon-add') %>
-</div>
+<% end %>
 
 
