@@ -6,7 +6,9 @@ class RedmineChartController < ApplicationController
   helper :queries
   include IssuesHelper
   include QueriesHelper
-  
+  helper :sort
+  include SortHelper
+ 
   
   #before_filter :find_project, :authorize
   before_filter :select_project, :require_login
@@ -16,7 +18,10 @@ class RedmineChartController < ApplicationController
 
    #retrieve_query
    retrieve_charts_query
+
    get_project_dates
+   @issues = @query.issues(:include => [:assigned_to, :fixed_version])
+
    
    # プロジェクトメニュー表示
    @last_date  = params[:date_to]
@@ -274,5 +279,9 @@ private
   def retrieve_charts_query
 	      @query = RedmineChartQuery.new(:name => "_")
 	      @query.project = @project
+          sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
+          sort_update(@query.sortable_columns)
+          @query.sort_criteria = sort_criteria.to_a
+
   end
 end
