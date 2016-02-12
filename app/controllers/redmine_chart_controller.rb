@@ -277,11 +277,35 @@ private
   def find_issues_end_date
   end
   def retrieve_charts_query
-	      @query = RedmineChartQuery.new(:name => "_")
-	      @query.project = @project
-          sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
-          sort_update(@query.sortable_columns)
-          @query.sort_criteria = sort_criteria.to_a
-
+	      #@query = RedmineChartQuery.new(:name => "_")
+	      #@query.project = @project
+          #sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
+          #sort_update(@query.sortable_columns)
+          #@query.sort_criteria = sort_criteria.to_a
+    if params[:set_filter] || session[:charts_query].nil? || session[:charts_query][:project_id] != (@project ? @project.id : nil)
+      # Give it a name, required to be valid
+      @query = RedmineChartQuery.new(:name => "_")
+      @query.project = @project
+      @query.build_from_params(params)
+      session[:charts_query] = {:project_id => @query.project_id,
+                                      :filters => @query.filters,
+                                      :group_by => @query.group_by,
+                                      :column_names => @query.column_names,
+                                      :date_from => @query.date_from,
+                                      :date_to => @query.date_to}
+    else
+      # retrieve from session
+      @query = RedmineChartQuery.new(:name => "_",
+        :filters => session[:charts_query][:filters],
+        :group_by => session[:charts_query][:group_by],
+        :column_names => session[:charts_query][:column_names],
+        :date_from => session[:charts_query][:date_from],
+        :date_to => session[:charts_query][:date_to]
+        )
+      @query.project = @project
+    end
+      sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
+      sort_update(@query.sortable_columns)
+      @query.sort_criteria = sort_criteria.to_a
   end
 end
