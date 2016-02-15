@@ -26,7 +26,6 @@ class RedmineChartController < ApplicationController
    # プロジェクトメニュー表示
    @last_date  = params[:date_to]
    @first_date = params[:date_from]
-   @view_id = params[:assigned_to_id]
    
    
     @today = Date.today
@@ -51,7 +50,7 @@ class RedmineChartController < ApplicationController
     # ログインユーザー取得
     @crnt_uname = User.current.login
     @crnt_uid = User.current.id
-
+    
     # プロジェクトチケットリスト取得　@
     get_project_issues # @project_issuesを取得してくる
 
@@ -89,7 +88,7 @@ class RedmineChartController < ApplicationController
       data:   @status_list_cnt
     })
     end
-     # project count
+    # project count
     @chart2 = LazyHighCharts::HighChart.new('pie') do |f|
     f.chart2({defaultSeriesType: 'pie', margin: [50, 200, 60, 170]})
     f.series({
@@ -99,30 +98,6 @@ class RedmineChartController < ApplicationController
     })
     end
     
-    # 折れ線グラフ
-    category = [1,3,5,7]
-    current_quantity = [1000,5000,3000,8000]
-
-    @graph = LazyHighCharts::HighChart.new('graph') do |f|
-      f.title(text: 'ItemXXXの在庫の推移')
-      f.xAxis(categories: category)
-      f.series(name: '在庫数', data: current_quantity)
-    end
-	
-	# 折れ線と棒グラフMIX
-	@multiple = LazyHighCharts::HighChart.new('graph') do |f|
-        f.title(:text => "Population vs GDP For 5 Big Countries [2009]")
-        f.xAxis(:categories => ["United States", "Japan", "China", "Germany", "France"])
-        f.series(:name => "GDP in Billions", :yAxis => 0, :data => [14119, 5068, 4985, 3339, 2656], type: 'column')
-        f.series(:name => "Population in Millions", :yAxis => 1, :data => [310, 127, 1340, 81, 65])
-        f.yAxis [
-          {:title => {:text => "GDP in Billions", :margin => 70} },
-          {:title => {:text => "Population in Millions"}, :opposite => true},
-        ]
-        f.legend(:align => 'right', :verticalAlign => 'top', :y => 75, :x => -50, :layout => 'vertical',)
-	f.chart({:defaultSeriesType=> 'line'})
-        # いずれイメージ出力するf.exporting(:enabled=>true,:filename=>"multi.png")
-    end
 	# BurnUp Chart
  	    # 経過時間リストからプロジェクトとユーザーに合致するリストをチケット順にソート
         @date_by_count=[]           # 日別チケット件数
@@ -272,19 +247,16 @@ private
   end
   # データ開始日
   def find_issues_start_date
+  	return @query.date_from
   end
   # データ終了日
   def find_issues_end_date
+  	return @query.date_to
   end
   def retrieve_charts_query
-	      #@query = RedmineChartQuery.new(:name => "_")
-	      #@query.project = @project
-          #sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
-          #sort_update(@query.sortable_columns)
-          #@query.sort_criteria = sort_criteria.to_a
-    if params[:set_filter] || session[:charts_query].nil? || session[:charts_query][:project_id] != (@project ? @project.id : nil)
+  if params[:set_filter] || session[:charts_query].nil? || session[:charts_query][:project_id] != (@project ? @project.id : nil)
       # Give it a name, required to be valid
-      @query = RedmineChartQuery.new(:name => "_")
+      @query = RedmineChartQuery.new(:name => "_",:filters => { 'assigned_to_id' => {:operator => '=', :values => ['me']}})
       @query.project = @project
       @query.build_from_params(params)
       session[:charts_query] = {:project_id => @query.project_id,

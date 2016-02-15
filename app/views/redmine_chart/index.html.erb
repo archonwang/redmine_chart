@@ -18,13 +18,6 @@
 
 <%= render :partial => 'pie_chart', object:  @prj_list_cnt ,  :locals => { :total => @all_assigned , :chart =>@chart2 , :name => "prj" } %>
 
-<div style="width: 70%; height: 600px">
-<%= high_chart("sample", @graph) %>
-</div>
-
-<div style="width: 100%; height: 600px">
-<%= high_chart("mix", @multiple) %>
-</div>
 <div style="width: 100%; height: 600px">
 <%= high_chart("mix2", @multiple2) %>
 </div>

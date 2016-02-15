@@ -2,7 +2,8 @@ class RedmineChartQuery < IssueQuery
 
   def initialize(attributes=nil, *args)
     super attributes
-    self.filters.delete('status_id')
+     #self.filters.delete('status_id')
+    
   end
  def initialize_available_filters
     principals = []
