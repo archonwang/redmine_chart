@@ -47,7 +47,7 @@ date <%=@num%>
 <br>
 ::::
 **<%= @time_entries.count%>
-*<%= @time_entries%>
+*<%= @status_list%>
 
 <% content_for :sidebar do %>
     <%= link_to_if_authorized(l(:label_redmine_chart_new), 

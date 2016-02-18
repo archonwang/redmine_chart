@@ -71,12 +71,18 @@ class RedmineChartController < ApplicationController
     get_answering_issues( "assigned_to_id = ?", @crnt_uid)
     @assigned_list = @answering_issuses
     @status_list_cnt = []              
-    @assigned = @assigned_list.count
+    @assigned = @issues.count #@assigned_list.count
     @open = @assigned_list.open.count
     IssueStatus.all.each{ | stslist |
-    @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist.id )
-     @status_list_cnt << [IssueStatus.find(stslist.id).name , @assigned_stats.where(status_id: stslist.id ).count]
-   }
+#    @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist.id )
+#     @status_list_cnt << [IssueStatus.find(stslist.id).name , @assigned_stats.where(status_id: stslist.id ).count]
+logger.debug("====================")
+    #logger.debug(@query.statement)
+    @status_list_cnt << [ IssueStatus.find(stslist.id).name ,@issues.select{| hash | hash[:status_id]== stslist.id }.count]
+    logger.debug( @status_list_cnt )
+    logger.debug("====================")   
+}   
+   
      
     # 円グラフ
      # status_count
