@@ -116,7 +116,12 @@ logger.debug("====================")
         @date_plan_times=[]
         # 予定工数調整
             @all_last_due_date = @assigned_list.order("due_date DESC").first[:due_date]
+        #@ddue_date = @issues.sort{|a,b| b[:due_date] <=> a[:due_date]}.first[:due_date]
+        @ddue_date = @issues.max_by{|a| a[:due_date]}[:due_date]
+
             @all_first_due_date =@assigned_list.order("start_date ").first[:start_date]
+        #@sdue_date = @issues.sort{|a,b| a[:start_date] <=> b[:start_date]}.first[:due_date]
+        @sdue_date = @issues.min_by{|a| a[:start_date]}[:start_date]
             @term_date= (@all_last_due_date - @all_first_due_date).to_i
             @num = 0.0
         # 描画開始日から終了日までのチケット詳細

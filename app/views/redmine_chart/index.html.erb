@@ -48,7 +48,10 @@ date <%=@num%>
 ::::
 **<%= @time_entries.count%>
 *<%= @status_list%>
-
+<br>
+***<%= @ddue_date%><br>
+***<%= @sdue_date%>
+<br>
 <% content_for :sidebar do %>
     <%= link_to_if_authorized(l(:label_redmine_chart_new), 
                             {:action => 'new', :project_id => @project}, 
