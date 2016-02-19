@@ -2,6 +2,13 @@
 <%= render :partial => 'filter' %>
 <%=l(:label_redmine_chart_first_date) %><%= @first_date%><p>
 <%=l(:label_redmine_chart_last_date) %><%=@last_date%><p>
+<p>
+<% if @issues.empty? %>
+<p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+<%= render :partial => 'issues/list', :locals => {:issues => @issues, :query => @query} %>
+<% end %>
+
 <h2><%= l(:label_redmine_chart_index_prj_menu) %>&ensp;(<%= @today %>)</h2>
 <%= @start_date %> <%= l(:label_redmine_chart_index_start_day) %><br>
 <%= @due_date %> <%= l(:label_redmine_chart_index_past_days) %><br>
@@ -11,13 +18,6 @@
 
 <%= render :partial => 'pie_chart', object:  @prj_list_cnt ,  :locals => { :total => @all_assigned , :chart =>@chart2 , :name => "prj" } %>
 
-<div style="width: 70%; height: 600px">
-<%= high_chart("sample", @graph) %>
-</div>
-
-<div style="width: 100%; height: 600px">
-<%= high_chart("mix", @multiple) %>
-</div>
 <div style="width: 100%; height: 600px">
 <%= high_chart("mix2", @multiple2) %>
 </div>
@@ -47,8 +47,11 @@ date <%=@num%>
 <br>
 ::::
 **<%= @time_entries.count%>
-*<%= @time_entries%>
-
+*<%= @status_list%>
+<br>
+***<%= @ddue_date%><br>
+***<%= @sdue_date%>
+<br>
 <% content_for :sidebar do %>
     <%= link_to_if_authorized(l(:label_redmine_chart_new), 
                             {:action => 'new', :project_id => @project}, 

@@ -6,6 +6,8 @@ class RedmineChartController < ApplicationController
   helper :queries
   include IssuesHelper
   include QueriesHelper
+  helper :sort
+  include SortHelper
   
   
   #before_filter :find_project, :authorize
@@ -17,10 +19,14 @@ class RedmineChartController < ApplicationController
    #retrieve_query
    retrieve_charts_query
    get_project_dates
+   @issues = @query.issues(:include => [:assigned_to, :fixed_version])
+
+   
    # プロジェクトメニュー表示
    @last_date  = params[:date_to]
    @first_date = params[:date_from]
 
+   
     @today = Date.today
     @due_date = @project.due_date
     @start_date = @project.start_date
@@ -64,12 +70,18 @@ class RedmineChartController < ApplicationController
     get_answering_issues( "assigned_to_id = ?", @crnt_uid)
     @assigned_list = @answering_issuses
     @status_list_cnt = []              
-    @assigned = @assigned_list.count
+    @assigned = @issues.count #@assigned_list.count
     @open = @assigned_list.open.count
     IssueStatus.all.each{ | stslist |
-    @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist.id )
-     @status_list_cnt << [IssueStatus.find(stslist.id).name , @assigned_stats.where(status_id: stslist.id ).count]
-   }
+#    @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist.id )
+#     @status_list_cnt << [IssueStatus.find(stslist.id).name , @assigned_stats.where(status_id: stslist.id ).count]
+logger.debug("====================")
+    #logger.debug(@query.statement)
+    @status_list_cnt << [ IssueStatus.find(stslist.id).name ,@issues.select{| hash | hash[:status_id]== stslist.id }.count]
+    logger.debug( @status_list_cnt )
+    logger.debug("====================")   
+}   
+   
      
     # 円グラフ
      # status_count
@@ -91,30 +103,6 @@ class RedmineChartController < ApplicationController
     })
     end
     
-    # 折れ線グラフ
-    category = [1,3,5,7]
-    current_quantity = [1000,5000,3000,8000]
-
-    @graph = LazyHighCharts::HighChart.new('graph') do |f|
-      f.title(text: 'ItemXXXの在庫の推移')
-      f.xAxis(categories: category)
-      f.series(name: '在庫数', data: current_quantity)
-    end
-	
-	# 折れ線と棒グラフMIX
-	@multiple = LazyHighCharts::HighChart.new('graph') do |f|
-        f.title(:text => "Population vs GDP For 5 Big Countries [2009]")
-        f.xAxis(:categories => ["United States", "Japan", "China", "Germany", "France"])
-        f.series(:name => "GDP in Billions", :yAxis => 0, :data => [14119, 5068, 4985, 3339, 2656], type: 'column')
-        f.series(:name => "Population in Millions", :yAxis => 1, :data => [310, 127, 1340, 81, 65])
-        f.yAxis [
-          {:title => {:text => "GDP in Billions", :margin => 70} },
-          {:title => {:text => "Population in Millions"}, :opposite => true},
-        ]
-        f.legend(:align => 'right', :verticalAlign => 'top', :y => 75, :x => -50, :layout => 'vertical',)
-	f.chart({:defaultSeriesType=> 'line'})
-        # いずれイメージ出力するf.exporting(:enabled=>true,:filename=>"multi.png")
-    end
 	# BurnUp Chart
  	    # 経過時間リストからプロジェクトとユーザーに合致するリストをチケット順にソート
         @date_by_count=[]           # 日別チケット件数
@@ -127,7 +115,12 @@ class RedmineChartController < ApplicationController
         @date_plan_times=[]
         # 予定工数調整
             @all_last_due_date = @assigned_list.order("due_date DESC").first[:due_date]
+        #@ddue_date = @issues.sort{|a,b| b[:due_date] <=> a[:due_date]}.first[:due_date]
+        @ddue_date = @issues.max_by{|a| a[:due_date]}[:due_date]
+
             @all_first_due_date =@assigned_list.order("start_date ").first[:start_date]
+        #@sdue_date = @issues.sort{|a,b| a[:start_date] <=> b[:start_date]}.first[:due_date]
+        @sdue_date = @issues.min_by{|a| a[:start_date]}[:start_date]
             @term_date= (@all_last_due_date - @all_first_due_date).to_i
             @num = 0.0
         # 描画開始日から終了日までのチケット詳細
@@ -168,34 +161,39 @@ class RedmineChartController < ApplicationController
             
             @minas =@term_estimated_times.quo(@term_date).to_f
             @date_spent_time <<  @term_estimated_times - @date_estimated_time.last.to_f
-            @date_plan_times <<  @term_estimated_times - (@minas*@num).to_f    
+            calc_est_time = @term_estimated_times - (@minas*@num).to_f
+            if calc_est_time < 0 then
+            	@date_plan_times << 0
+            else
+            	@date_plan_times << calc_est_time
+            end
 	}
 	
 	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
-        f.title(:text =>@crnt_uname+"チケット一覧" )
+        f.title(:text =>@crnt_uname+l(:label_redmine_chart_issues_story) )
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
-         {:title =>{:text=> "日数", :margin => 1}},
-         {:title =>{:text=> "累積時間"}, :opposite => true },
+         {:title =>{:text=> l(:label_redmine_chart_issues_count), :margin => 1}},
+         {:title =>{:text=> l(:label_redmine_chart_accumulated_time)}, :opposite => true },
         ]        
-        f.series(:name => "件数", :yAxis => 0, :data => @date_by_count,:type => 'column' )
-        f.series(:name => "累積件数", :yAxis => 0, :data => @term_by_count,:type => 'column' )
-        f.series(:name => "累積予定工数", :yAxis => 1, :data => @term_estimated_time )
-        f.series(:name => "累積作業工数", :yAxis => 1, :data => @date_estimated_time )
-        f.series(:name => "累積残工数", :yAxis => 1, :data => @date_spent_time )
+        f.series(:name => l(:label_redmine_chart_issues_per_date), :yAxis => 0, :data => @date_by_count,:type => 'column' )
+        f.series(:name => l(:label_redmine_chart_issues_total), :yAxis => 0, :data => @term_by_count,:type => 'column' )
+        f.series(:name => l(:label_redmine_chart_term_estimated_time), :yAxis => 1, :data => @term_estimated_time )
+        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 1, :data => @date_estimated_time )
+        #f.series(:name => "累積残工数", :yAxis => 1, :data => @date_spent_time )
         #f.options[:chart][:defaultSeriesType] = "column"
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
     # BurnDown Chart
 	@multiple3 = LazyHighCharts::HighChart.new('graph') do |f|
-        f.title(:text =>@crnt_uname+"BurnDownチャート" )
+        f.title(:text =>@crnt_uname+l(:label_redmine_chart_burn_down)+l(:label_redmine_chart) )
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
-         {:title =>{:text=> "累積時間"}, :opposite => true },
+         {:title =>{:text=> l(:label_redmine_chart_remaining_time)}, :opposite => true }, 
         ]        
-        f.series(:name => "累積作業工数", :yAxis => 0, :data => @date_estimated_time )
-        f.series(:name => "予定作業工数", :yAxis => 0, :data => @date_plan_times )
+        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 0, :data => @date_spent_time)
+        f.series(:name => l(:label_redmine_chart_ideal_line), :yAxis => 0, :data => @date_plan_times )
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
@@ -259,12 +257,37 @@ private
   end
   # データ開始日
   def find_issues_start_date
+  	return @query.date_from
   end
   # データ終了日
   def find_issues_end_date
+  	return @query.date_to
   end
   def retrieve_charts_query
-	      @query = RedmineChartQuery.new(:name => "_")
+  if params[:set_filter] || session[:charts_query].nil? || session[:charts_query][:project_id] != (@project ? @project.id : nil)
+      # Give it a name, required to be valid
+      @query = RedmineChartQuery.new(:name => "_",:filters => { 'assigned_to_id' => {:operator => '=', :values => ['me']}})
+      @query.project = @project
+      @query.build_from_params(params)
+      session[:charts_query] = {:project_id => @query.project_id,
+                                      :filters => @query.filters,
+                                      :group_by => @query.group_by,
+                                      :column_names => @query.column_names,
+                                      :date_from => @query.date_from,
+                                      :date_to => @query.date_to}
+    else
+      # retrieve from session
+      @query = RedmineChartQuery.new(:name => "_",
+        :filters => session[:charts_query][:filters],
+        :group_by => session[:charts_query][:group_by],
+        :column_names => session[:charts_query][:column_names],
+        :date_from => session[:charts_query][:date_from],
+        :date_to => session[:charts_query][:date_to]
+        )
 	      @query.project = @project
+    end
+      sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
+      sort_update(@query.sortable_columns)
+      @query.sort_criteria = sort_criteria.to_a
   end
 end

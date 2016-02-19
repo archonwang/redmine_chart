@@ -2,7 +2,8 @@ class RedmineChartQuery < IssueQuery
 
   def initialize(attributes=nil, *args)
     super attributes
-    self.filters.delete('status_id')
+     #self.filters.delete('status_id')
+    
   end
  def initialize_available_filters
     principals = []
@@ -67,4 +68,38 @@ class RedmineChartQuery < IssueQuery
 
 
  end
+
+  def date_from
+    @date_from
+  end
+
+  def date_from=(arg)
+    @date_from = Date.parse(arg.to_s) rescue nil
+  end
+
+  def date_to
+    @date_to
+  end
+
+  def date_to=(arg)
+    @date_to = Date.parse(arg.to_s) rescue nil
+  end
+
+  def build_from_params(params)
+    if params[:fields] || params[:f]
+      self.filters = {}
+      add_filters(params[:fields] || params[:f], params[:operators] || params[:op], params[:values] || params[:v])
+    else
+      available_filters.keys.each do |field|
+        add_short_filter(field, params[field]) if params[field]
+      end
+    end
+    self.group_by = params[:group_by] || (params[:query] && params[:query][:group_by])
+    self.column_names = params[:c] || (params[:query] && params[:query][:column_names])
+
+    self.date_from = params[:date_from] || (params[:query] && params[:query][:date_from])
+    self.date_to = params[:date_to] || (params[:query] && params[:query][:date_to])
+    self
+  end
+
 end
