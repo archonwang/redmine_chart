@@ -121,10 +121,14 @@ logger.debug("====================<")
         @date_pending_time=[]       # 日別残工数
         @date_spent_times=[]        # 日別累積作業工数
         @date_plan_times=[]
+        @date_per_issue=[] #close issues
+        @term_per_issue=[]
         # 予定工数調整
 
             @term_date= (@all_last_due_date - @all_first_due_date).to_i
             @num = 0.0
+            close_count  = @assigned
+            
         # 描画開始日から終了日までのチケット詳細
 	#(@start_date.to_date..@today).each{ |index_date|
 	(@all_first_due_date..@all_last_due_date).each{ |index_date|
@@ -132,9 +136,18 @@ logger.debug("====================<")
            # 開始日該当チケット抽出
            #@date_by_tickets = @assigned_list.where( start_date: index_date)
                       
-           @date_by_tickets = @issues.select{|hash | hash[:start_date] >=index_date }
+           @date_by_tickets = @issues.select{|hash | hash[:start_date] ==index_date }
            # 日別チケット件数 
            @date_by_count <<  @date_by_tickets.count
+           # close count 
+           @date_close_issue = @date_by_tickets.select{|hash | hash.closed? == true }.count
+           @date_per_issue << @date_close_issue
+           if  0 < close_count  then
+            close_count -= @date_close_issue
+            @term_per_issue << close_count
+           else
+            @term_per_issue << 0
+           end
 
            # 表示期間の日付
            @term_arry << index_date
@@ -192,7 +205,7 @@ logger.debug("====================<")
             end
 	}
 	
-    # BurnUp Chart
+    # BurnUp Chart time
 	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
         f.title(:text =>@crnt_uname+l(:label_redmine_chart_issues_story) )
         f.xAxis(:categories =>@term_arry )
@@ -207,7 +220,6 @@ logger.debug("====================<")
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
-    # BurnDown Chart
 	@multiple3 = LazyHighCharts::HighChart.new('graph') do |f|
         f.title(:text =>@crnt_uname+l(:label_redmine_chart_burn_down)+l(:label_redmine_chart) )
         f.xAxis(:categories =>@term_arry )
@@ -216,6 +228,19 @@ logger.debug("====================<")
         ]        
         f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 0, :data => @date_pending_time)
         f.series(:name => l(:label_redmine_chart_ideal_line), :yAxis => 0, :data => @date_plan_times )
+        f.chart({:defaultSeriesType=> 'line'})
+        f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
+    end
+
+    # BurnUp Chart issue
+	@multiple4 = LazyHighCharts::HighChart.new('graph') do |f|
+        f.title(:text =>l(:label_redmine_chart_burn_down)+l(:label_redmine_chart) )
+        f.xAxis(:categories =>@term_arry )
+        f.yAxis [
+         {:title =>{:text=> l(:label_redmine_chart_issues_count)}, :opposite => true }, 
+        ]        
+        f.series(:name => l(:label_redmine_chart_issues_per_date), :yAxis => 0, :data => @date_per_issue)
+        f.series(:name => l(:label_redmine_chart_issues_total), :yAxis => 0, :data => @term_per_issue )
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
