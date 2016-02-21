@@ -18,33 +18,49 @@ class RedmineChartController < ApplicationController
    #retrieve_query
    retrieve_charts_query
    #初期値
-   @query.date_to ||= Date.today
-
+   @today = Date.today
+   @query.date_to ||= @today
+   
+   #project date
    get_project_dates
    @last_date  = params[:date_to]
    @first_date = params[:date_from]
-   
-    @today = Date.today
-    @due_date = @project.due_date
-    @start_date = @project.start_date     
-    
-    #　描画範囲決定
 
-    @all_first_due_date=  @start_date.to_date
-    unless @first_date.nil?
-     if @start_date.to_date <= @first_date.to_date
-        @all_first_due_date = @first_date.to_date 
-     end
-    end
-    @all_last_due_date = @today
-    unless @last_date.nil?
-     if @last_date.to_date <= @today then
-        @all_last_due_date = @last_date.to_date
-     end
-    end
-
-
+   # queryからissuesを入手
    @issues = @query.issues(:include => [:assigned_to, :fixed_version])
+   
+   # 該当issueの開始日と終了日を入手
+   @enable_due_date   = @issues.max_by{|a| a[:due_date]}[:due_date]
+   @enable_start_date = @issues.min_by{|a| a[:start_date]}[:start_date]
+       
+    # 描画範囲決定
+    @all_first_date = @project_start_date
+    unless @enable_start_date.nil?
+     unless @first_date.nil?
+      if @enable_start_date <= @first_date.to_date then
+        @all_first_date = @first_date.to_date
+      else
+        @all_first_date = @enable_start_date
+      end
+     end
+    else
+     @enable_start_date = @project_start_date
+    end
+    
+    @all_last_date = @project_due_date
+    unless @enable_due_date.nil?
+	 unless @last_date.nil?
+	  if @last_date.to_date <= @enable_due_date then
+	    @all_last_date = @last_date.to_date
+	  else
+	    @all_last_date = @enable_due_date
+	  end
+	 end
+    else
+     @enable_due_date = @project_due_date
+    end
+
+
 
    
    # プロジェクトメニュー表示
@@ -53,15 +69,14 @@ class RedmineChartController < ApplicationController
     @crnt_uname = User.current.login
     @crnt_uid = User.current.id
 
-#   Account　Menuにて実装予定
+#   Account Menuにて実装予定
 #
 #    # プロジェクトチケットリスト取得　@
 #    get_project_issues # @project_issuesを取得してくる
 #    # プロジェクト別ユーザの担当チケット数 project count
 #    @prj_list_cnt = []
 #    
-#    get_filter_issues(" assigned_to_id = ?",  @crnt_uid )
-#    @all_assigned_list = @filter_issues 
+#    @all_assigned_list = @project_issues.where(["assigned_to_id = ?",  @crnt_uid)
 #    @all_assigned = @all_assigned_list.count
 #    Project.all.each{ |prjobj|
 #     @assigned_prj=@all_assigned_list.joins("INNER JOIN projects prj on prj.id = issues.project_id ").where(project_id: prjobj.id )
@@ -99,6 +114,7 @@ logger.debug("====================<")
       data:   @status_list_cnt
     })
     end
+ #   Account Menuにて実装予定
  #    # project count
  #   @chart2 = LazyHighCharts::HighChart.new('pie') do |f|
  #   f.chart2({defaultSeriesType: 'pie', margin: [50, 200, 60, 170]})
@@ -123,25 +139,43 @@ logger.debug("====================<")
         @date_plan_times=[]
         @date_per_issue=[] #close issues
         @term_per_issue=[]
+         
         # 予定工数調整
 
-            @term_date= (@all_last_due_date - @all_first_due_date).to_i
-            @num = 0.0
-            close_count  = @assigned
-            
+        @term_date= (@all_last_date - @all_first_date).to_i
+        @num = 0.0
+        close_count  = @assigned 
+        @before_date_by_count = 0
+        @before_date_close_count = 0
+        # range issues start count 
+        @range_issues = @issues.select{| hash | hash[:start_date] >= @enable_start_date and hash[:due_date] <= @all_last_date }
+
+        # 描画開始前該当チケット抽出
+        @before_date_by_tickets = @range_issues.select{| hash | hash[:start_date] >= @enable_start_date and hash[:start_date] <= @all_first_date }
+        # 描画開始前該当日別チケット件数 
+        @before_date_by_count =  @before_date_by_tickets.count
+        # 
+        @before_date_close_count = @before_date_by_tickets.select{|hash | hash.closed? == true }.count
+        date_close_issue = @before_date_close_count
+        
         # 描画開始日から終了日までのチケット詳細
-	#(@start_date.to_date..@today).each{ |index_date|
-	(@all_first_due_date..@all_last_due_date).each{ |index_date|
+	(@all_first_date..@all_last_date).each{ |index_date|
            @num+=1
            # 開始日該当チケット抽出
-           #@date_by_tickets = @assigned_list.where( start_date: index_date)
-                      
-           @date_by_tickets = @issues.select{|hash | hash[:start_date] ==index_date }
+           @date_by_tickets = @range_issues.select{|hash | hash[:start_date] ==index_date }
            # 日別チケット件数 
            @date_by_count <<  @date_by_tickets.count
+
            # close count 
-           @date_close_issue = @date_by_tickets.select{|hash | hash.closed? == true }.count
-           @date_per_issue << @date_close_issue
+        @date_close_issue = @range_issues.select{|hash | hash.closed? == true and hash[:closed_on].to_date == index_date }.count
+		logger.debug(">====================@date_close_issue")
+		logger.debug(@date_close_issue)
+		logger.debug("==")
+		logger.debug(date_close_issue)
+		logger.debug("====================<")
+           
+           date_close_issue += @date_close_issue
+           @date_per_issue << date_close_issue
            if  0 < close_count  then
             close_count -= @date_close_issue
             @term_per_issue << close_count
@@ -158,17 +192,13 @@ logger.debug("====================<")
                if dat['estimated_hours']!= nil then  
                 @term_estimated_times += dat['estimated_hours']
                end
-logger.debug(">====================term_estimated_times")
-logger.debug(@term_estimated_times)
-logger.debug("====================<")
-
+			logger.debug(">====================term_estimated_times")
+			logger.debug(@term_estimated_times)
+			logger.debug("====================<")
            }
            @term_estimated_time << @term_estimated_times
 
            # 日別累積作業工数算出
-           #@time_entries = TimeEntry.
-           #              where(["user_id=:uid and spent_on <=:day1 and project_id=:pid ",
-           #              {:uid => @crnt_uid, :day1 => index_date.to_time.to_date ,:pid => @project }]).all
            @time_entries = TimeEntry.where(['issue_id IN (?) AND spent_on = ?', @date_by_tickets,index_date])
             #  工数の入力がなければ0.0を代入
             if @time_entries.count == 0 then
@@ -178,20 +208,20 @@ logger.debug("====================<")
                 date_sum = 0
                 @time_entries.each{ |entry|
                      date_sum += entry[:hours]
-logger.debug(">====================entry[:hour]")
-logger.debug(entry[:hours])
-logger.debug("====================<")
+				#logger.debug(">====================entry[:hour]")
+				#logger.debug(entry[:hours])
+				#logger.debug("====================<")
                 }
                 @date_spent_times  << @date_estimated_time.sum + date_sum
 
                 @date_estimated_time << date_sum
             end
-logger.debug(">====================@date_spent_times ")
-logger.debug(@date_spent_times)
-logger.debug("====================<")
-logger.debug(">====================@date_estimated_time ")
-logger.debug(@date_estimated_time)
-logger.debug("====================<")
+#logger.debug(">====================@date_spent_times ")
+#logger.debug(@date_spent_times)
+#logger.debug("====================<")
+#logger.debug(">====================@date_estimated_time ")
+#logger.debug(@date_estimated_time)
+#logger.debug("====================<")
 
             # 日別残工数
             
@@ -250,9 +280,6 @@ logger.debug("====================<")
   end
 
   def show
-#  retrieve_query
-#  get_project_dates
-    
   end
 
   def edit
@@ -293,14 +320,6 @@ private
   #  該当プロジェクトチケットデータ取得
   def get_project_issues
         @project_issues =  Issue.where(["project_id = ? ", @project])
-  end
-  #  該当チケットデータ取得
-  def get_filter_issues( key,  id )
-        @filter_issues =  Issue.where([ key, id ])
-  end
-  # プロジェクト該当チケットデータ取得
-  def get_answering_issues( key,  id )
-	@answering_issuses = @project_issues.where([ key, id ])
   end
   # データ開始日
   def find_issues_start_date
