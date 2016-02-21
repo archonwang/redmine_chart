@@ -173,15 +173,8 @@ logger.debug("====================<")
 		logger.debug("==")
 		logger.debug(date_close_issue)
 		logger.debug("====================<")
+
            
-           date_close_issue += @date_close_issue
-           @date_per_issue << date_close_issue
-           if  0 < close_count  then
-            close_count -= @date_close_issue
-            @term_per_issue << close_count
-           else
-            @term_per_issue << 0
-           end
 
            # 表示期間の日付
            @term_arry << index_date
@@ -198,8 +191,19 @@ logger.debug("====================<")
            }
            @term_estimated_time << @term_estimated_times
 
+           # close count 
+           date_close_issue += @date_close_issue
+           @date_per_issue << date_close_issue
+           if  0 < close_count  then
+            term_close = @term_by_count.last - @date_close_issue
+            @term_per_issue << term_close
+           else
+            @term_per_issue << 0
+           end
+
            # 日別累積作業工数算出
-           @time_entries = TimeEntry.where(['issue_id IN (?) AND spent_on = ?', @date_by_tickets,index_date])
+           #@time_entries = TimeEntry.where(['issue_id IN (?) AND spent_on = ?', @date_by_tickets,index_date])
+           @time_entries = TimeEntry.where(['issue_id IN (?) AND spent_on = ?', @range_issues,index_date])
             #  工数の入力がなければ0.0を代入
             if @time_entries.count == 0 then
                @date_estimated_time << 0.0
@@ -237,7 +241,7 @@ logger.debug("====================<")
 	
     # BurnUp Chart time
 	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
-        f.title(:text =>@crnt_uname+l(:label_redmine_chart_issues_story) )
+        f.title(:text =>l(:label_redmine_chart_issues_story) )
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
          {:title =>{:text=> l(:label_redmine_chart_issues_count), :margin => 1}},
@@ -250,13 +254,14 @@ logger.debug("====================<")
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
+    # BurnDown Chart time
 	@multiple3 = LazyHighCharts::HighChart.new('graph') do |f|
-        f.title(:text =>@crnt_uname+l(:label_redmine_chart_burn_down)+l(:label_redmine_chart) )
+        f.title(:text =>l(:label_redmine_chart_burn_down)+l(:label_redmine_chart) )
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
          {:title =>{:text=> l(:label_redmine_chart_remaining_time)}, :opposite => true }, 
         ]        
-        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 0, :data => @date_pending_time)
+        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 0, :data => @date_spent_times )#@date_pending_time)
         f.series(:name => l(:label_redmine_chart_ideal_line), :yAxis => 0, :data => @date_plan_times )
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
@@ -264,13 +269,13 @@ logger.debug("====================<")
 
     # BurnUp Chart issue
 	@multiple4 = LazyHighCharts::HighChart.new('graph') do |f|
-        f.title(:text =>l(:label_redmine_chart_burn_down)+l(:label_redmine_chart) )
+        f.title(:text =>l(:label_redmine_chart_issues)+l(:label_redmine_chart_burn_up)+l(:label_redmine_chart))
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
          {:title =>{:text=> l(:label_redmine_chart_issues_count)}, :opposite => true }, 
         ]        
-        f.series(:name => l(:label_redmine_chart_issues_per_date), :yAxis => 0, :data => @date_per_issue)
-        f.series(:name => l(:label_redmine_chart_issues_total), :yAxis => 0, :data => @term_per_issue )
+        f.series(:name => l(:label_redmine_chart_finishing)+l(:label_redmine_chart_issues_count), :yAxis => 0, :data => @date_per_issue)
+        f.series(:name => l(:label_redmine_chart_less)+l(:label_redmine_chart_issues_count), :yAxis => 0, :data => @term_per_issue )
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end

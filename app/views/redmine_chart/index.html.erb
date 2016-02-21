@@ -1,17 +1,15 @@
 <%= javascript_include_tag 'highcharts.js', :plugin => 'redmine_chart' %>
 <%= render :partial => 'filter' %>
-<%=l(:label_redmine_chart_first_date) %><%= @first_date%><p>
-<%=l(:label_redmine_chart_last_date) %><%=@last_date%><p>
 <p>
 <% if @issues.empty? ||  @assigned <= 0   %>
 <p class="nodata"><%= l(:label_no_data) %></p>
 <% else %>
-<%= render :partial => 'issues/list', :locals => {:issues => @issues, :query => @query} %>
+<%#= render :partial => 'issues/list', :locals => {:issues => @issues, :query => @query} %>
 
 <h2><%= l(:label_redmine_chart_index_prj_menu) %>&ensp;(<%= @today %>)</h2>
-<%= @start_date %> <%= l(:label_redmine_chart_index_start_day) %><br>
-<%= @due_date %> <%= l(:label_redmine_chart_index_past_days) %><br>
-<h3><%= @crnt_uname%><%= l(:label_redmine_chart_index_tickets_for) %></h3>
+<%#= @start_date %> <%#= l(:label_redmine_chart_index_start_day) %><br>
+<%#= @due_date %> <%#= l(:label_redmine_chart_index_past_days) %><br>
+<h3><%#= @crnt_uname%><%= l(:label_redmine_chart_index_tickets_for) %></h3>
 <p>
 <%= render :partial => 'pie_chart', object:  @status_list_cnt ,  :locals => { :total => @assigned , :chart =>@chart , :name => "sts"} %>
 
@@ -20,46 +18,14 @@
 <div style="width: 100%; height: 600px">
 <%= high_chart("mix2", @multiple2) %>
 </div>
-<div style="width: 100%; height: 600px">
-<%= high_chart("burnup", @multiple4) %>
-</div>
-<p>
 <p>
 <div style="width: 100%; height: 600px">
 <%= high_chart("mix3", @multiple3) %>
 </div>
-<p>
-spent  userid  issue_id updated <br>
-<% @time_entries.each do | entr | -%>
-<%=entr[:hours]%>
-<%=entr[:user_id]%>
-<%=entr[:issue_id]%>
-<%=entr[:updated_on].to_date%><br>
-<% end -%>
-<p>
-<%= @term_estimated_times %>
-<p>
-last term date <%=@all_last_due_date%><br>
-first term date <%=@all_first_due_date%>
-<br>
-term date <%=@term_date%>
-<br>
-per date <%=@minas%>
-<br>
-date <%=@num%>
-<br>
-::::
-**<%= @time_entries.count%>
-*<%= @status_list%>
-<br>
-***<%= @ddue_date%><br>
-***<%= @sdue_date%>
-<br>
-<% content_for :sidebar do %>
-    <%= link_to_if_authorized(l(:label_redmine_chart_new), 
-                            {:action => 'new', :project_id => @project}, 
-                            :class => 'icon icon-add') %>
-<% end %>
+<div style="width: 100%; height: 600px">
+<%= high_chart("burnup", @multiple4) %>
+</div>
+
 <% end %>
 
 
