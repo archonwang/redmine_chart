@@ -35,8 +35,8 @@ logger.debug(">=")
 logger.debug(">==")
 
    # 該当issueの開始日と終了日を入手
-   #@enable_due_date   = @issues.max_by{|a| a[:due_date]}.nil?[:due_date]:nil
-   #@enable_start_date = @issues.min_by{|a| a[:start_date]}.nil?[:start_date]:nil
+   #@enable_due_date   = @issues.max_by{|a| a[:due_date]}.nil?[:due_date]
+   #@enable_start_date = @issues.min_by{|a| a[:start_date]}.nil?[:start_date]
 
 logger.debug(">===")
 
@@ -162,6 +162,7 @@ logger.debug("====================<")
 logger.debug(">====================all_date")
 logger.debug( @all_last_date)
 logger.debug( @all_first_date)
+logger.debug( @enable_start_date.nil? )
 logger.debug("====================<")
         @term_date= (@all_last_date - @all_first_date).to_i
             @num = 0.0
