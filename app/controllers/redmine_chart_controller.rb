@@ -20,48 +20,69 @@ class RedmineChartController < ApplicationController
    #初期値
    @today = Date.today
    @query.date_to ||= @today
-   
    #project date
    get_project_dates
    @last_date  = params[:date_to]
    @first_date = params[:date_from]
 
+logger.debug(">=")
+
    # queryからissuesを入手
    @issues = @query.issues(:include => [:assigned_to, :fixed_version])
    
+logger.debug(">==")
+
+   if @project_start_date.nil? then
+         render_error :status => "該当データが無いか、権限がありません"
+         return
+   end
+   if @project_due_date.nil? then
+         render_error :status => "該当データが無いか、権限がありません"
+         return
+   end
    # 該当issueの開始日と終了日を入手
-   @enable_due_date   = @issues.max_by{|a| a[:due_date]}[:due_date]
-   @enable_start_date = @issues.min_by{|a| a[:start_date]}[:start_date]
-       
+   #@enable_due_date   = @issues.max_by{|a| a[:due_date]}.nil?[:due_date]
+   #@enable_start_date = @issues.min_by{|a| a[:start_date]}.nil?[:start_date]
+   @enable_due_date   = @project_due_date
+   @enable_start_date = @project_start_date
+
+logger.debug(">===")
+   
     # 描画範囲決定
     @all_first_date = @project_start_date
-    unless @enable_start_date.nil?
-     unless @first_date.nil?
+    unless @enable_start_date.nil? then
+     unless @first_date.blank? then
       if @enable_start_date <= @first_date.to_date then
         @all_first_date = @first_date.to_date
       else
         @all_first_date = @enable_start_date
       end
+      @first_date = @project_start_date
      end
     else
      @enable_start_date = @project_start_date
     end
+logger.debug(">====")
     
     @all_last_date = @project_due_date
-    unless @enable_due_date.nil?
-	 unless @last_date.nil?
+    unless @enable_due_date.nil? then
+	 unless @last_date.blank? then
 	  if @last_date.to_date <= @enable_due_date then
 	    @all_last_date = @last_date.to_date
 	  else
 	    @all_last_date = @enable_due_date
 	  end
+	  @last_date =  @project_due_date
 	 end
     else
      @enable_due_date = @project_due_date
     end
+   
+logger.debug(">=====")
 
-
-
+   # queryからissuesを入手
+   @issues = @query.issues(:include => [:assigned_to, :fixed_version])
+   
    
    # プロジェクトメニュー表示
     
@@ -84,7 +105,7 @@ class RedmineChartController < ApplicationController
 #    }
 
     # プロジェクトの担当チケットステータス数　status_count
-    @status_list_cnt = []
+    @status_list_cnt = []              
     # チケット件数              
     @assigned = @issues.count 
 logger.debug(">====================")
@@ -141,23 +162,31 @@ logger.debug("====================<")
         @term_per_issue=[]
          
         # 予定工数調整
+logger.debug(">====================all_date")
+logger.debug( @all_last_date)
+logger.debug( @all_first_date)
+logger.debug( @enable_start_date)
 
+logger.debug("====================<")
         @term_date= (@all_last_date - @all_first_date).to_i
-        @num = 0.0
+            @num = 0.0
         close_count  = @assigned 
         @before_date_by_count = 0
         @before_date_close_count = 0
         # range issues start count 
-        @range_issues = @issues.select{| hash | hash[:start_date] >= @enable_start_date and hash[:due_date] <= @all_last_date }
+        @range_issues = @issues.select{| hash | hash[:start_date].nil? == false and hash[:start_date] >= @enable_start_date and hash[:start_date]<= @all_last_date }
+logger.debug(">======")
 
         # 描画開始前該当チケット抽出
         @before_date_by_tickets = @range_issues.select{| hash | hash[:start_date] >= @enable_start_date and hash[:start_date] <= @all_first_date }
+logger.debug(">=======")
+
         # 描画開始前該当日別チケット件数 
         @before_date_by_count =  @before_date_by_tickets.count
         # 
         @before_date_close_count = @before_date_by_tickets.select{|hash | hash.closed? == true }.count
         date_close_issue = @before_date_close_count
-        
+        date_opened_issue = @before_date_by_count - @before_date_close_count
         # 描画開始日から終了日までのチケット詳細
 	(@all_first_date..@all_last_date).each{ |index_date|
            @num+=1
@@ -165,6 +194,19 @@ logger.debug("====================<")
            @date_by_tickets = @range_issues.select{|hash | hash[:start_date] ==index_date }
            # 日別チケット件数 
            @date_by_count <<  @date_by_tickets.count
+           date_opened_issue += @date_by_count.last
+
+           # close count 
+        @date_close_issue = @range_issues.select{|hash | hash.closed? == true and hash[:closed_on].to_date == index_date }.count
+		logger.debug(">====================@date_close_issue")
+		logger.debug(@date_close_issue)
+		logger.debug("==")
+		logger.debug(@before_date_close_count)
+		logger.debug("==")
+		logger.debug(@date_opened_issue)
+		logger.debug("====================<")
+
+           
 
            # close count 
         @date_close_issue = @range_issues.select{|hash | hash.closed? == true and hash[:closed_on].to_date == index_date }.count
@@ -195,8 +237,13 @@ logger.debug("====================<")
            date_close_issue += @date_close_issue
            @date_per_issue << date_close_issue
            if  0 < close_count  then
-            term_close = @term_by_count.last - @date_close_issue
-            @term_per_issue << term_close
+            #term_close = @term_by_count.last - @date_per_issue.sum
+            term_close = date_opened_issue - date_close_issue
+            if 0 <= term_close  then
+              @term_per_issue << term_close
+            else
+              @term_per_issue << 0
+            end
            else
             @term_per_issue << 0
            end
@@ -348,7 +395,7 @@ private
                                       :date_to => @query.date_to}
 logger.debug(">====================")
 logger.debug( "initial retrive" )
-logger.debug( @query.date_from )
+#logger.debug( @query.date_from )
 logger.debug("====================<")   
     else
       # retrieve from session
