@@ -368,7 +368,7 @@ private
                                       :date_to => @query.date_to}
 logger.debug(">====================")
 logger.debug( "initial retrive" )
-logger.debug( @query.date_from )
+#logger.debug( @query.date_from )
 logger.debug("====================<")   
     else
       # retrieve from session
