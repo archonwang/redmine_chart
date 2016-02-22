@@ -35,9 +35,11 @@ class RedmineChartController < ApplicationController
 
    unless @project_start_date.nil?
          render_error :status => "該当データが無いか、権限がありません"
+         return
    end
    unless @project_due_date.nil?
          render_error :status => "該当データが無いか、権限がありません"
+         return
    end
    
     # 描画範囲決定
