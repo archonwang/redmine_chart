@@ -33,14 +33,6 @@ logger.debug(">=")
    
 logger.debug(">==")
 
-   # 該当issueの開始日と終了日を入手
-   #@enable_due_date   = @issues.max_by{|a| a[:due_date]}.nil?[:due_date]
-   #@enable_start_date = @issues.min_by{|a| a[:start_date]}.nil?[:start_date]
-
-   @enable_due_date   = @project_due_date
-   @enable_start_date = @project_start_date
-logger.debug(">===")
-
    if @project_start_date.nil? then
          render_error :status => "該当データが無いか、権限がありません"
          return
@@ -49,6 +41,13 @@ logger.debug(">===")
          render_error :status => "該当データが無いか、権限がありません"
          return
    end
+   # 該当issueの開始日と終了日を入手
+   #@enable_due_date   = @issues.max_by{|a| a[:due_date]}.nil?[:due_date]
+   #@enable_start_date = @issues.min_by{|a| a[:start_date]}.nil?[:start_date]
+   @enable_due_date   = @project_due_date
+   @enable_start_date = @project_start_date
+
+logger.debug(">===")
    
     # 描画範囲決定
     @all_first_date = @project_start_date
