@@ -19,6 +19,7 @@ class RedmineChartController < ApplicationController
    retrieve_charts_query
    #初期値
    @today = Date.today
+   @query.date_from ||= @today-1
    @query.date_to ||= @today
    
    #project date
@@ -26,12 +27,17 @@ class RedmineChartController < ApplicationController
    @last_date  = params[:date_to]
    @first_date = params[:date_from]
 
+logger.debug(">=")
+
    # queryからissuesを入手
    @issues = @query.issues(:include => [:assigned_to, :fixed_version])
+logger.debug(">==")
 
    # 該当issueの開始日と終了日を入手
    @enable_due_date   = @issues.max_by{|a| a[:due_date]}[:due_date]
    @enable_start_date = @issues.min_by{|a| a[:start_date]}[:start_date]
+
+logger.debug(">===")
 
    if @project_start_date.nil? then
          render_error :status => "該当データが無いか、権限がありません"
@@ -55,6 +61,7 @@ class RedmineChartController < ApplicationController
     else
      @enable_start_date = @project_start_date
     end
+logger.debug(">====")
     
     @all_last_date = @project_due_date
     unless @enable_due_date.nil?
@@ -69,6 +76,7 @@ class RedmineChartController < ApplicationController
      @enable_due_date = @project_due_date
     end
    
+logger.debug(">=====")
 
    
    
