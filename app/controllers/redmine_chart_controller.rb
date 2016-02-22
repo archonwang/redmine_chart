@@ -51,8 +51,8 @@ logger.debug(">===")
    
     # 描画範囲決定
     @all_first_date = @project_start_date
-    unless @enable_start_date.nil?
-     unless @first_date.nil?
+    unless @enable_start_date.nil? then
+     unless @first_date.nil? then
       if @enable_start_date <= @first_date.to_date then
         @all_first_date = @first_date.to_date
       else
@@ -66,8 +66,8 @@ logger.debug(">===")
 logger.debug(">====")
     
     @all_last_date = @project_due_date
-    unless @enable_due_date.nil?
-	 unless @last_date.nil?
+    unless @enable_due_date.nil? then
+	 unless @last_date.nil? then
 	  if @last_date.to_date <= @enable_due_date then
 	    @all_last_date = @last_date.to_date
 	  else
