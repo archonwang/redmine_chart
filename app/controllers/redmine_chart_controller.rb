@@ -9,7 +9,6 @@ class RedmineChartController < ApplicationController
   helper :sort
   include SortHelper
   
-  
   #before_filter :find_project, :authorize
   before_filter :select_project, :require_login
   before_filter :find_redmine_chart, :except => [:index, :new, :create, :preview, :show, ]
@@ -18,44 +17,76 @@ class RedmineChartController < ApplicationController
 
    #retrieve_query
    retrieve_charts_query
-   get_project_dates
-   @issues = @query.issues(:include => [:assigned_to, :fixed_version])
-
+   #初期値
+   @today = Date.today
+   @query.date_to ||= @today
    
-   # プロジェクトメニュー表示
+   #project date
+   get_project_dates
    @last_date  = params[:date_to]
    @first_date = params[:date_from]
 
+   # queryからissuesを入手
+   @issues = @query.issues(:include => [:assigned_to, :fixed_version])
+
+   # 該当issueの開始日と終了日を入手
+   @enable_due_date   = @issues.max_by{|a| a[:due_date]}[:due_date]
+   @enable_start_date = @issues.min_by{|a| a[:start_date]}[:start_date]
+       
+    # 描画範囲決定
+    @all_first_date = @project_start_date
+    unless @enable_start_date.nil?
+     unless @first_date.nil?
+      if @enable_start_date <= @first_date.to_date then
+        @all_first_date = @first_date.to_date
+      else
+        @all_first_date = @enable_start_date
+      end
+     end
+    else
+     @enable_start_date = @project_start_date
+    end
+    
+    @all_last_date = @project_due_date
+    unless @enable_due_date.nil?
+	 unless @last_date.nil?
+	  if @last_date.to_date <= @enable_due_date then
+	    @all_last_date = @last_date.to_date
+	  else
+	    @all_last_date = @enable_due_date
+	  end
+	 end
+    else
+     @enable_due_date = @project_due_date
+    end
    
-    @today = Date.today
-    @due_date = @project.due_date
-    @start_date = @project.start_date     
+
+   
+   
+   # プロジェクトメニュー表示
     
     # ログインユーザー取得
     @crnt_uname = User.current.login
     @crnt_uid = User.current.id
 
-    # プロジェクトチケットリスト取得　@
-    get_project_issues # @project_issuesを取得してくる
-
+#   Account Menuにて実装予定
+#
+#    # プロジェクトチケットリスト取得　@
+#    get_project_issues # @project_issuesを取得してくる
 #    # プロジェクト別ユーザの担当チケット数 project count
 #    @prj_list_cnt = []
 #    
-#    get_filter_issues(" assigned_to_id = ?",  @crnt_uid )
-#    @all_assigned_list = @filter_issues 
+#    @all_assigned_list = @project_issues.where(["assigned_to_id = ?",  @crnt_uid)
 #    @all_assigned = @all_assigned_list.count
-    
 #    Project.all.each{ |prjobj|
 #     @assigned_prj=@all_assigned_list.joins("INNER JOIN projects prj on prj.id = issues.project_id ").where(project_id: prjobj.id )
 #     @prj_list_cnt << [Project.find(prjobj.id).name , @assigned_prj.where(project_id: prjobj.id ).count]
 #    }
 
     # プロジェクトの担当チケットステータス数　status_count
-    
-#    get_answering_issues( "assigned_to_id = ?", @crnt_uid)
-#    @assigned_list = @answering_issuses
     @status_list_cnt = []              
-    @assigned = @issues.count #@assigned_list.count
+    # チケット件数              
+    @assigned = @issues.count 
 logger.debug(">====================")
 logger.debug( @assigned )
 logger.debug("====================<")
@@ -65,8 +96,6 @@ logger.debug("====================<")
     end
 #    @open = @assigned_list.open.count
     IssueStatus.all.each{ | stslist |
-#    @assigned_stats = @assigned_list.joins("INNER JOIN issue_statuses ist on ist.id = issues.status_id ").where(status_id: stslist.id )
-#     @status_list_cnt << [IssueStatus.find(stslist.id).name , @assigned_stats.where(status_id: stslist.id ).count]
     @status_list_cnt << [ IssueStatus.find(stslist.id).name ,@issues.select{| hash | hash[:status_id]== stslist.id }.count]
 logger.debug(">====================")
 logger.debug( @status_list_cnt )
@@ -85,6 +114,7 @@ logger.debug("====================<")
       data:   @status_list_cnt
     })
     end
+ #   Account Menuにて実装予定
  #    # project count
  #   @chart2 = LazyHighCharts::HighChart.new('pie') do |f|
  #   f.chart2({defaultSeriesType: 'pie', margin: [50, 200, 60, 170]})
@@ -95,33 +125,6 @@ logger.debug("====================<")
  #   })
  #   end
 
-    #　描画範囲決定
-
-        #@issues_last_due_date = @issues.max_by{|a| a[:due_date]}[:due_date]
-#logger.debug(">====================")
-#logger.debug(@issues_last_due_date)
-#logger.debug("====================<")   
-
-        #@all_first_due_date =@assigned_list.order("start_date ").first[:start_date]
-        #@sdue_date = @issues.sort{|a,b| a[:start_date] <=> b[:start_date]}.first[:due_date]
-#        @issues_first_due_date  = @issues.min_by{|a| a[:start_date]}[:start_date]
-#logger.debug(">====================")
-#logger.debug( @issues_first_due_date)
-#logger.debug("====================<")   
-
-    @all_first_due_date=  @start_date.to_date
-    unless @first_date.nil?
-     if @start_date.to_date <= @first_date.to_date
-        @all_first_due_date = @first_date.to_date 
-     end
-    end
-    @all_last_due_date = @today
-    unless @last_date.nil?
-     if @last_date.to_date <= @today then
-        @to_date = @last_date.to_date
-     end
-    end
-
     
 	# BurnUp Chart
  	    # 経過時間リストからプロジェクトとユーザーに合致するリストをチケット順にソート
@@ -131,22 +134,47 @@ logger.debug("====================<")
         @term_estimated_times = 0.0 # 期間累積予定工数
         @term_estimated_time =[]    # 期間予定工数
         @date_estimated_time=[]     # 日別予定工数
-        @date_spent_time=[]         # 日別残工数
+        @date_pending_time=[]       # 日別残工数
         @date_spent_times=[]        # 日別累積作業工数
         @date_plan_times=[]
+        @date_per_issue=[] #close issues
+        @term_per_issue=[]
+         
         # 予定工数調整
 
-            @term_date= (@all_last_due_date - @all_first_due_date).to_i
+        @term_date= (@all_last_date - @all_first_date).to_i
             @num = 0.0
+        close_count  = @assigned 
+        @before_date_by_count = 0
+        @before_date_close_count = 0
+        # range issues start count 
+        @range_issues = @issues.select{| hash | hash[:start_date] >= @enable_start_date and hash[:due_date] <= @all_last_date }
+
+        # 描画開始前該当チケット抽出
+        @before_date_by_tickets = @range_issues.select{| hash | hash[:start_date] >= @enable_start_date and hash[:start_date] <= @all_first_date }
+        # 描画開始前該当日別チケット件数 
+        @before_date_by_count =  @before_date_by_tickets.count
+        # 
+        @before_date_close_count = @before_date_by_tickets.select{|hash | hash.closed? == true }.count
+        date_close_issue = @before_date_close_count
+        
         # 描画開始日から終了日までのチケット詳細
-	#(@start_date.to_date..@today).each{ |index_date|
-	(@all_first_due_date..@all_last_due_date).each{ |index_date|
+	(@all_first_date..@all_last_date).each{ |index_date|
            @num+=1
            # 開始日該当チケット抽出
-           #@date_by_tickets = @assigned_list.where( start_date: index_date)
-           @date_by_tickets = @issues.select{| hash | hash[:start_date]== index_date }
+           @date_by_tickets = @range_issues.select{|hash | hash[:start_date] ==index_date }
            # 日別チケット件数 
            @date_by_count <<  @date_by_tickets.count
+
+           # close count 
+        @date_close_issue = @range_issues.select{|hash | hash.closed? == true and hash[:closed_on].to_date == index_date }.count
+		logger.debug(">====================@date_close_issue")
+		logger.debug(@date_close_issue)
+		logger.debug("==")
+		logger.debug(date_close_issue)
+		logger.debug("====================<")
+
+           
 
            # 表示期間の日付
            @term_arry << index_date
@@ -157,39 +185,52 @@ logger.debug("====================<")
                if dat['estimated_hours']!= nil then  
                 @term_estimated_times += dat['estimated_hours']
                end
-logger.debug(">====================term_estimated_times")
-logger.debug(@term_estimated_times)
-logger.debug("====================<")
-
+			logger.debug(">====================term_estimated_times")
+			logger.debug(@term_estimated_times)
+			logger.debug("====================<")
            }
            @term_estimated_time << @term_estimated_times
+
+           # close count 
+           date_close_issue += @date_close_issue
+           @date_per_issue << date_close_issue
+           if  0 < close_count  then
+            term_close = @term_by_count.last - @date_close_issue
+            @term_per_issue << term_close
+           else
+            @term_per_issue << 0
+           end
+
            # 日別累積作業工数算出
-           #@time_entries = TimeEntry.
-           #              where(["user_id=:uid and spent_on <=:day1 and project_id=:pid ",
-           #              {:uid => @crnt_uid, :day1 => index_date.to_time.to_date ,:pid => @project }]).all
-            @time_entries = TimeEntry.where(['issue_id IN (?)', @date_by_tickets])
+           #@time_entries = TimeEntry.where(['issue_id IN (?) AND spent_on = ?', @date_by_tickets,index_date])
+           @time_entries = TimeEntry.where(['issue_id IN (?) AND spent_on = ?', @range_issues,index_date])
             #  工数の入力がなければ0.0を代入
             if @time_entries.count == 0 then
                @date_estimated_time << 0.0
+               @date_spent_times  << @date_estimated_time.sum
             else
                 date_sum = 0
                 @time_entries.each{ |entry|
                      date_sum += entry[:hours]
-logger.debug(">====================entry[:hour]")
-logger.debug(entry[:hours])
-logger.debug("====================<")
+				#logger.debug(">====================entry[:hour]")
+				#logger.debug(entry[:hours])
+				#logger.debug("====================<")
                 }
+                @date_spent_times  << @date_estimated_time.sum + date_sum
+
                 @date_estimated_time << date_sum
-                @date_spent_times  << @date_estimated_time
-logger.debug(">====================@date_estimated_time ")
-logger.debug(@date_estimated_time)
-logger.debug("====================<")
             end
+#logger.debug(">====================@date_spent_times ")
+#logger.debug(@date_spent_times)
+#logger.debug("====================<")
+#logger.debug(">====================@date_estimated_time ")
+#logger.debug(@date_estimated_time)
+#logger.debug("====================<")
 
             # 日別残工数
             
             @minas =@term_estimated_times.quo(@term_date).to_f
-            @date_spent_time <<  @term_estimated_times - @date_estimated_time.last.to_f
+            @date_pending_time <<  @term_estimated_times - @date_estimated_time.last.to_f
             calc_est_time = @term_estimated_times - (@minas*@num).to_f
             if calc_est_time < 0 then
             	@date_plan_times << 0
@@ -198,9 +239,9 @@ logger.debug("====================<")
             end
 	}
 	
-    # BurnUp Chart
+    # BurnUp Chart time
 	@multiple2 = LazyHighCharts::HighChart.new('graph') do |f|
-        f.title(:text =>@crnt_uname+l(:label_redmine_chart_issues_story) )
+        f.title(:text =>l(:label_redmine_chart_issues_story) )
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
          {:title =>{:text=> l(:label_redmine_chart_issues_count), :margin => 1}},
@@ -208,22 +249,33 @@ logger.debug("====================<")
         ]        
         f.series(:name => l(:label_redmine_chart_issues_per_date), :yAxis => 0, :data => @date_by_count,:type => 'column' )
         f.series(:name => l(:label_redmine_chart_issues_total), :yAxis => 0, :data => @term_by_count,:type => 'column' )
-        f.series(:name => l(:label_redmine_chart_term_estimated_time), :yAxis => 1, :data => @term_estimated_time )
-        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 1, :data => @date_spent_times )
-        #f.series(:name => "累積残工数", :yAxis => 1, :data => @date_spent_time )
-        #f.options[:chart][:defaultSeriesType] = "column"
+        f.series(:name => l(:label_redmine_chart_term_estimated_time), :yAxis => 1, :data => @term_estimated_time )#累積予定工数
+        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 1, :data => @date_spent_times )#累積作業工数
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
-    # BurnDown Chart
+    # BurnDown Chart time
 	@multiple3 = LazyHighCharts::HighChart.new('graph') do |f|
-        f.title(:text =>@crnt_uname+l(:label_redmine_chart_burn_down)+l(:label_redmine_chart) )
+        f.title(:text =>l(:label_redmine_chart_burn_down)+l(:label_redmine_chart) )
         f.xAxis(:categories =>@term_arry )
         f.yAxis [
          {:title =>{:text=> l(:label_redmine_chart_remaining_time)}, :opposite => true }, 
         ]        
-        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 0, :data => @date_spent_time)
+        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 0, :data => @date_spent_times )#@date_pending_time)
         f.series(:name => l(:label_redmine_chart_ideal_line), :yAxis => 0, :data => @date_plan_times )
+        f.chart({:defaultSeriesType=> 'line'})
+        f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
+    end
+
+    # BurnUp Chart issue
+	@multiple4 = LazyHighCharts::HighChart.new('graph') do |f|
+        f.title(:text =>l(:label_redmine_chart_issues)+l(:label_redmine_chart_burn_up)+l(:label_redmine_chart))
+        f.xAxis(:categories =>@term_arry )
+        f.yAxis [
+         {:title =>{:text=> l(:label_redmine_chart_issues_count)}, :opposite => true }, 
+        ]        
+        f.series(:name => l(:label_redmine_chart_finishing)+l(:label_redmine_chart_issues_count), :yAxis => 0, :data => @date_per_issue)
+        f.series(:name => l(:label_redmine_chart_less)+l(:label_redmine_chart_issues_count), :yAxis => 0, :data => @term_per_issue )
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
     end
@@ -233,9 +285,6 @@ logger.debug("====================<")
   end
 
   def show
-#  retrieve_query
-#  get_project_dates
-    
   end
 
   def edit
@@ -277,14 +326,6 @@ private
   def get_project_issues
         @project_issues =  Issue.where(["project_id = ? ", @project])
   end
-  #  該当チケットデータ取得
-  def get_filter_issues( key,  id )
-        @filter_issues =  Issue.where([ key, id ])
-  end
-  # プロジェクト該当チケットデータ取得
-  def get_answering_issues( key,  id )
-	@answering_issuses = @project_issues.where([ key, id ])
-  end
   # データ開始日
   def find_issues_start_date
   	return @query.date_from
@@ -305,6 +346,10 @@ private
                                       :column_names => @query.column_names,
                                       :date_from => @query.date_from,
                                       :date_to => @query.date_to}
+logger.debug(">====================")
+logger.debug( "initial retrive" )
+logger.debug( @query.date_from )
+logger.debug("====================<")   
     else
       # retrieve from session
       @query = RedmineChartQuery.new(:name => "_",
@@ -315,6 +360,9 @@ private
         :date_to => session[:charts_query][:date_to]
         )
 	      @query.project = @project
+logger.debug(">====================")
+logger.debug( "session retrive" )
+logger.debug("====================<")   
     end
       sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
       sort_update(@query.sortable_columns)

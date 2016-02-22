@@ -25,4 +25,7 @@ en:
   label_redmine_chart_burn_down: "Burn Down"
   label_redmine_chart_burn_up: "Burn Up"
   label_redmine_chart_issues_story: "Issues Story"
+  label_redmine_chart_issues: "Issues"
+  label_redmine_chart_less: "Less than"
+  label_redmine_chart_finishing: "Finishing"
 

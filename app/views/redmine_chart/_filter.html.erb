@@ -18,9 +18,9 @@
             <tr>
               <td><%= l(:label_redmine_chart_first_date) %></td>
               <td>
-                <%= text_field_tag 'date_from', @project_start_date, :size => 10 %><%= calendar_for('date_from') %>
+                <%= text_field_tag 'date_from', @query.date_from, :size => 10 %><%= calendar_for('date_from') %>
                 <%= l(:label_redmine_chart_last_date) %>
-                <%= text_field_tag 'date_to', @project_due_date, :size => 10 %><%= calendar_for('date_to') %>
+                <%= text_field_tag 'date_to', @query.date_to, :size => 10 %><%= calendar_for('date_to') %>
               </td>
             </tr>
           </table>
