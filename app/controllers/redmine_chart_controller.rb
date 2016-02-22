@@ -32,7 +32,14 @@ class RedmineChartController < ApplicationController
    # 該当issueの開始日と終了日を入手
    @enable_due_date   = @issues.max_by{|a| a[:due_date]}[:due_date]
    @enable_start_date = @issues.min_by{|a| a[:start_date]}[:start_date]
-       
+
+   unless @project_start_date.nil?
+         render_error :status => "該当データが無いか、権限がありません"
+   end
+   unless @project_due_date.nil?
+         render_error :status => "該当データが無いか、権限がありません"
+   end
+   
     # 描画範囲決定
     @all_first_date = @project_start_date
     unless @enable_start_date.nil?
