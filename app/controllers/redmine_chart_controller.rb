@@ -31,11 +31,12 @@ logger.debug(">=")
 
    # queryからissuesを入手
    @issues = @query.issues(:include => [:assigned_to, :fixed_version])
+   
 logger.debug(">==")
 
    # 該当issueの開始日と終了日を入手
-   @enable_due_date   = @issues.max_by{|a| a[:due_date]}[:due_date]
-   @enable_start_date = @issues.min_by{|a| a[:start_date]}[:start_date]
+   #@enable_due_date   = @issues.max_by{|a| a[:due_date]}.nil?[:due_date]:nil
+   #@enable_start_date = @issues.min_by{|a| a[:start_date]}.nil?[:start_date]:nil
 
 logger.debug(">===")
 
@@ -169,9 +170,12 @@ logger.debug("====================<")
         @before_date_close_count = 0
         # range issues start count 
         @range_issues = @issues.select{| hash | hash[:start_date] >= @enable_start_date and hash[:due_date] <= @all_last_date }
+logger.debug(">======)
 
         # 描画開始前該当チケット抽出
         @before_date_by_tickets = @range_issues.select{| hash | hash[:start_date] >= @enable_start_date and hash[:start_date] <= @all_first_date }
+logger.debug(">=======")
+
         # 描画開始前該当日別チケット件数 
         @before_date_by_count =  @before_date_by_tickets.count
         # 
