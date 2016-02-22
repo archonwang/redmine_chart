@@ -19,7 +19,6 @@ class RedmineChartController < ApplicationController
    retrieve_charts_query
    #初期値
    @today = Date.today
-   @query.date_from ||= @today-1
    @query.date_to ||= @today
    
    #project date

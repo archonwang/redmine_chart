@@ -7,8 +7,8 @@
 <%#= render :partial => 'issues/list', :locals => {:issues => @issues, :query => @query} %>
 
 <h2><%= l(:label_redmine_chart_index_prj_menu) %>&ensp;(<%= @today %>)</h2>
-<%#= @start_date %> <%#= l(:label_redmine_chart_index_start_day) %><br>
-<%#= @due_date %> <%#= l(:label_redmine_chart_index_past_days) %><br>
+<%= @all_start_date %> <%#= l(:label_redmine_chart_index_start_day) %><br>
+<%= @all_last_date %> <%#= l(:label_redmine_chart_index_past_days) %><br>
 <h3><%#= @crnt_uname%><%= l(:label_redmine_chart_index_tickets_for) %></h3>
 <p>
 <%= render :partial => 'pie_chart', object:  @status_list_cnt ,  :locals => { :total => @assigned , :chart =>@chart , :name => "sts"} %>
