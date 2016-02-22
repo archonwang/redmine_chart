@@ -38,6 +38,8 @@ logger.debug(">==")
    #@enable_due_date   = @issues.max_by{|a| a[:due_date]}.nil?[:due_date]
    #@enable_start_date = @issues.min_by{|a| a[:start_date]}.nil?[:start_date]
 
+   @enable_due_date   = @project_due_date
+   @enable_start_date = @project_start_date
 logger.debug(">===")
 
    if @project_start_date.nil? then
@@ -162,7 +164,6 @@ logger.debug("====================<")
 logger.debug(">====================all_date")
 logger.debug( @all_last_date)
 logger.debug( @all_first_date)
-               @enable_start_date = @project_start_date
 logger.debug( @enable_start_date)
 
 logger.debug("====================<")
@@ -172,7 +173,7 @@ logger.debug("====================<")
         @before_date_by_count = 0
         @before_date_close_count = 0
         # range issues start count 
-        @range_issues = @issues.select{| hash | hash[:start_date].nil? == true and hash[:start_date] >= @enable_start_date and hash[:start_date]<= @all_last_date }
+        @range_issues = @issues.select{| hash | hash[:start_date].nil? == false and hash[:start_date] >= @enable_start_date and hash[:start_date]<= @all_last_date }
 logger.debug(">======")
 
         # 描画開始前該当チケット抽出
