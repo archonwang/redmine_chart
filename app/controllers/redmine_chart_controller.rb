@@ -170,7 +170,7 @@ logger.debug("====================<")
         @before_date_close_count = 0
         # range issues start count 
         @range_issues = @issues.select{| hash | hash[:start_date] >= @enable_start_date and hash[:due_date].nil? <= @all_last_date }
-logger.debug(">======)
+logger.debug(">======")
 
         # 描画開始前該当チケット抽出
         @before_date_by_tickets = @range_issues.select{| hash | hash[:start_date] >= @enable_start_date and hash[:start_date] <= @all_first_date }
