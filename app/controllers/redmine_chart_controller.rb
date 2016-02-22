@@ -58,6 +58,7 @@ logger.debug(">===")
       else
         @all_first_date = @enable_start_date
       end
+      @first_date = @project_start_date
      end
     else
      @enable_start_date = @project_start_date
@@ -72,6 +73,7 @@ logger.debug(">====")
 	  else
 	    @all_last_date = @enable_due_date
 	  end
+	  @last_date =  @project_due_date
 	 end
     else
      @enable_due_date = @project_due_date
