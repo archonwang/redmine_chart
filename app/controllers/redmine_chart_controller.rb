@@ -165,7 +165,7 @@ logger.debug("====================<")
            @date_by_tickets = @range_issues.select{|hash | hash[:start_date] ==index_date }
            # 日別チケット件数 
            @date_by_count <<  @date_by_tickets.count
-           date_opened_issue += @date_by_count.last.count
+           date_opened_issue += @date_by_count.last
 
            # close count 
         @date_close_issue = @range_issues.select{|hash | hash.closed? == true and hash[:closed_on].to_date == index_date }.count
