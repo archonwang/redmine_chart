@@ -4,8 +4,8 @@ Redmine::Plugin.register :redmine_chart do
   author 'ryuthky'
   description 'This is a plugin for Redmine'
   version '1.0.0'
-  url 'https://github.com/ryuthky/redmine_burn_charts'
-  author_url 'https://github.com/ryuthky/redmine_burn_charts/wiki'
+  url 'https://github.com/ryuthky/redmine_chart'
+  author_url 'https://github.com/ryuthky/redmine_chart/wiki'
   
   # プラグインモジュール権限設定
   project_module :redmine_chart do
