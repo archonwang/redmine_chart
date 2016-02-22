@@ -157,14 +157,15 @@ logger.debug("====================<")
         # 
         @before_date_close_count = @before_date_by_tickets.select{|hash | hash.closed? == true }.count
         date_close_issue = @before_date_close_count
-        
+        date_opened_issue = @before_date_by_count
         # 描画開始日から終了日までのチケット詳細
 	(@all_first_date..@all_last_date).each{ |index_date|
            @num+=1
            # 開始日該当チケット抽出
            @date_by_tickets = @range_issues.select{|hash | hash[:start_date] ==index_date }
+           date_opened_issue += @date_by_tickets.count
            # 日別チケット件数 
-           @date_by_count <<  @date_by_tickets.count
+           @date_by_count <<  date_opened_issue
 
            # close count 
         @date_close_issue = @range_issues.select{|hash | hash.closed? == true and hash[:closed_on].to_date == index_date }.count
