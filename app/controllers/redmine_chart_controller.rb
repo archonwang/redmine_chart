@@ -196,7 +196,7 @@ logger.debug("====================<")
            @date_per_issue << date_close_issue
            if  0 < close_count  then
             term_close = @term_by_count.last - @date_per_issue.sum
-            if 0 =< term_close
+            if 0 <= term_close  then
               @term_per_issue << term_close
             else
               @term_per_issue << 0
