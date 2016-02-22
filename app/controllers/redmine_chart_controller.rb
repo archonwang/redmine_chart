@@ -157,7 +157,7 @@ logger.debug("====================<")
         # 
         @before_date_close_count = @before_date_by_tickets.select{|hash | hash.closed? == true }.count
         date_close_issue = @before_date_close_count
-        date_opened_issue = @before_date_by_tickets.count - @before_date_close_count
+        date_opened_issue = @before_date_by_count - @before_date_close_count
         # 描画開始日から終了日までのチケット詳細
 	(@all_first_date..@all_last_date).each{ |index_date|
            @num+=1
@@ -173,6 +173,8 @@ logger.debug("====================<")
 		logger.debug(@date_close_issue)
 		logger.debug("==")
 		logger.debug(@before_date_close_count)
+		logger.debug("==")
+		logger.debug(@date_opened_issue)
 		logger.debug("====================<")
 
            
@@ -197,7 +199,7 @@ logger.debug("====================<")
            @date_per_issue << date_close_issue
            if  0 < close_count  then
             #term_close = @term_by_count.last - @date_per_issue.sum
-            term_close = date_opened_issue - @date_per_issue.sum
+            term_close = date_opened_issue - date_close_issue
             if 0 <= term_close  then
               @term_per_issue << term_close
             else
