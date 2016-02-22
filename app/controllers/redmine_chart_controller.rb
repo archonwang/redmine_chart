@@ -162,11 +162,7 @@ logger.debug("====================<")
 logger.debug(">====================all_date")
 logger.debug( @all_last_date)
 logger.debug( @all_first_date)
-
-logger.debug( @enable_start_date)
-             if @enable_start_date.nil? then
                @enable_start_date = @project_start_date
-             endif
 logger.debug( @enable_start_date)
 
 logger.debug("====================<")
