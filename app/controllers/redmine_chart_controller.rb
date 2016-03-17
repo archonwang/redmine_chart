@@ -277,13 +277,15 @@ logger.debug(">=======")
             # 日別残工数
             
             @minas =@term_estimated_times.quo(@term_date).to_f
-            @date_pending_time <<  @term_estimated_times - @date_estimated_time.last.to_f
+            #@date_pending_time <<  @term_estimated_times - @date_estimated_time.last.to_f
             calc_est_time = @term_estimated_times - (@minas*@num).to_f
             if calc_est_time < 0 then
             	@date_plan_times << 0
             else
             	@date_plan_times << calc_est_time
             end
+            
+            @date_pending_time << @term_estimated_time.last.to_f-@date_estimated_time.last.to_f
 	}
 	
     # BurnUp Chart time
@@ -308,7 +310,8 @@ logger.debug(">=======")
         f.yAxis [
          {:title =>{:text=> l(:label_redmine_chart_remaining_time)}, :opposite => true }, 
         ]        
-        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 0, :data => @date_spent_times )#@date_pending_time)
+#        f.series(:name => l(:label_redmine_chart_actual_line), :yAxis => 0, :data => @date_spent_times )#@date_pending_time)
+        f.series(:name => l(:label_redmine_chart_remaining_time), :yAxis => 0, :data => @date_pending_time)
         f.series(:name => l(:label_redmine_chart_ideal_line), :yAxis => 0, :data => @date_plan_times )
         f.chart({:defaultSeriesType=> 'line'})
         f.plot_options({:column=>{:dataLabels =>{:enabled => true }}})
