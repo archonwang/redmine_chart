@@ -33,11 +33,11 @@ logger.debug(">=")
 logger.debug(">==")
 
    if @project_start_date.nil? then
-         render_error :status => "該当データが無いか、権限がありません"
+         render_error :message => "該当データが無いか、権限がありません", :status => 403
          return
    end
    if @project_due_date.nil? then
-         render_error :status => "該当データが無いか、権限がありません"
+         render_error :message => "該当データが無いか、権限がありません", :status => 403
          return
    end
    # 該当issueの開始日と終了日を入手
@@ -82,8 +82,7 @@ logger.debug(">=====")
 
    # queryからissuesを入手
    @issues = @query.issues(:include => [:assigned_to, :fixed_version])
-   
-   
+
    # プロジェクトメニュー表示
     
     # ログインユーザー取得
@@ -112,7 +111,7 @@ logger.debug(">====================")
 logger.debug( @assigned )
 logger.debug("====================<")
     if @assigned == 0 then
-      render_error :status => "該当データが無いか、権限がありません"
+      render_error :message => "該当データが無いか、権限がありません", :status => 403
       return
     end
 #    @open = @assigned_list.open.count
@@ -400,7 +399,7 @@ logger.debug(">====================")
 logger.debug( "initial retrive" )
 #logger.debug( @query.date_from )
 logger.debug("====================<")   
-    else
+  else
       # retrieve from session
       @query = RedmineChartQuery.new(:name => "_",
         :filters => session[:charts_query][:filters],
@@ -413,7 +412,7 @@ logger.debug("====================<")
 logger.debug(">====================")
 logger.debug( "session retrive" )
 logger.debug("====================<")   
-    end
+  end
       sort_init(@query.sort_criteria.empty? ? [['id', 'desc']] : @query.sort_criteria)
       sort_update(@query.sortable_columns)
       @query.sort_criteria = sort_criteria.to_a
